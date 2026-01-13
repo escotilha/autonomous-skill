@@ -4,11 +4,11 @@ A Claude Code skill that transforms feature requests into iterative, self-managi
 
 ## Inspiration
 
-This project stands on the shoulders of two key influences:
+This project is possible thanks to insights from two key influences that changed how I think about AI-assisted development:
 
-**[Ralph](https://github.com/snarktank/ralph)** by Ryan Carson (snarktank) — An implementation of Geoffrey Huntley's "Ralph Wiggum" technique for autonomous AI agent loops. The core insight: progress doesn't persist in the LLM's context window—it lives in your files and git history. When context fills up, you get a fresh agent picking up where the last one left off. Shoutout to both Ryan Carson and Geoffrey Huntley for pioneering this pattern.
+**[Ralph](https://github.com/snarktank/ralph)** — Ryan Carson's implementation of Geoffrey Huntley's "Ralph Wiggum" technique unlocked something fundamental: the AI doesn't need to remember everything—your files and git history do. Each iteration starts fresh, but progress compounds. This simple insight makes truly autonomous coding possible. Huge shoutout to Ryan Carson and Geoffrey Huntley for pioneering this pattern and sharing it with the world.
 
-**[Compound Engineering](https://every.to/chain-of-thought)** by Dan Shipper — Dan's work at Every exploring "compound engineering" showed how AI-native teams can achieve extraordinary productivity. His insight that Claude Code is really "Claude Agent" in disguise, and that features become an exercise in prompt-writing rather than coding, directly influenced this skill's design.
+**[Dan Shipper's Compound Engineering](https://every.to/chain-of-thought)** — Dan's work at Every showed me what's actually possible when you build AI-native from the ground up. Two engineers producing the output of fifteen. Features shipping in hours, not weeks. His reframe that Claude Code is really "Claude Agent"—and that new features are just prompts, not code—was the mental shift that made this skill click into place.
 
 ## Why Use This?
 

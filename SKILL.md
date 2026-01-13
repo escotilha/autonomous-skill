@@ -680,13 +680,33 @@ If a story needs something not yet implemented:
 
 ## Key Files Reference
 
-| File             | Purpose                    | Created            |
-| ---------------- | -------------------------- | ------------------ |
-| `tasks/prd-*.md` | Human-readable PRD         | Phase 1            |
-| `prd.json`       | Machine-readable task list | Phase 2            |
-| `progress.md`    | Append-only learnings      | Phase 2+           |
-| `AGENTS.md`      | Long-term repo patterns    | Anytime            |
-| `archive/`       | Previous completed PRDs    | Before new feature |
+| File                        | Purpose                          | Created            |
+| --------------------------- | -------------------------------- | ------------------ |
+| `tasks/prd-*.md`            | Human-readable PRD               | Phase 1            |
+| `prd.json`                  | Machine-readable task list       | Phase 2            |
+| `progress.md`               | Append-only learnings            | Phase 2+           |
+| `AGENTS.md`                 | Long-term repo patterns          | Anytime            |
+| `archive/`                  | Previous completed PRDs          | Before new feature |
+| `.worktree-scaffold.json`   | Worktree config (optional)       | User creates       |
+
+---
+
+## Worktree Integration
+
+The autonomous-agent integrates with the `worktree-scaffold` skill for parallel development.
+
+**Setup worktree support:**
+
+1. Create `.worktree-scaffold.json` in project root (run `/worktree-scaffold` → `init worktree config`)
+2. The agent will detect this file in Phase 2 and offer worktree creation
+3. Each feature gets its own isolated workspace
+
+**Benefits:**
+- Isolate feature development from main repo
+- Work on multiple features in parallel
+- Keep main directory clean during development
+
+**See also:** `/worktree-scaffold` skill for standalone worktree management.
 
 ---
 

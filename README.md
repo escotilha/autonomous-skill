@@ -2,6 +2,14 @@
 
 A Claude Code skill that transforms feature requests into iterative, self-managing implementation cycles. The agent breaks down features into small user stories and implements them one at a time with fresh context per iteration.
 
+## Inspiration
+
+This project stands on the shoulders of two key influences:
+
+**[Ralph](https://github.com/snarktank/ralph)** by Ryan Carson (snarktank) — An implementation of Geoffrey Huntley's "Ralph Wiggum" technique for autonomous AI agent loops. The core insight: progress doesn't persist in the LLM's context window—it lives in your files and git history. When context fills up, you get a fresh agent picking up where the last one left off. Shoutout to both Ryan Carson and Geoffrey Huntley for pioneering this pattern.
+
+**[Compound Engineering](https://every.to/chain-of-thought)** by Dan Shipper — Dan's work at Every exploring "compound engineering" showed how AI-native teams can achieve extraordinary productivity. His insight that Claude Code is really "Claude Agent" in disguise, and that features become an exercise in prompt-writing rather than coding, directly influenced this skill's design.
+
 ## Why Use This?
 
 - **Context-aware**: Reads your codebase patterns before writing code

@@ -507,17 +507,56 @@ function detectStoryType(story) {
 }
 ```
 
-**Detection in Action:**
+**Detection Implementation:**
+
+When Step 3.0a runs during autonomous loop execution:
+
+1. **Run Detection:**
+   ```javascript
+   const detectedType = detectStoryType(currentStory);
+   ```
+
+2. **Log to Console:**
+   ```
+   Story type detected: api
+   Detection signals: { api: 3, backend: 3, frontend: 0, database: 0, devops: 0 }
+   ```
+
+3. **Store in prd.json:**
+   ```javascript
+   currentStory.detectedType = detectedType;
+   savePRD(prd);
+   ```
+
+4. **Update progress.md:**
+   ```markdown
+   ## Story Analysis
+
+   - Detected type: api
+   - Confidence signals: { api: 3, backend: 3, frontend: 0 }
+   ```
+
+**Important:** Detection runs automatically but does **NOT** trigger delegation unless `delegation.enabled = true` in prd.json. This allows testing detection accuracy before enabling delegation.
+
+**Example Output:**
 
 ```
-Story analysis for US-003:
-- Title: "Add user profile API endpoint"
-- Keywords found: "endpoint", "API"
-- Detected type: API
-- Signals: { api: 3, backend: 3, frontend: 0, database: 0 }
-```
+## Starting: US-003 - Add user profile API endpoint
 
-**Note:** This detection runs silently for now. Full delegation requires `delegation.enabled = true` in prd.json (see Phase 2 setup).
+Story type detected: api
+Detection signals: { api: 3, backend: 3, frontend: 0, database: 0, devops: 0 }
+
+**Goal:** Create GET /api/users/:id endpoint
+
+**Acceptance Criteria:**
+- [ ] Returns user object with id, name, email
+- [ ] Returns 404 if not found
+- [ ] Returns 401 if not authenticated
+- [ ] Typecheck passes
+- [ ] Tests pass
+
+**Approach:** Create new API route handler in app/api/users/[id]/route.ts...
+```
 
 ### Step 3.1: Announce Task
 

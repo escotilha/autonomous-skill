@@ -100,6 +100,48 @@ Started: 2025-01-10
 
 ## Smart Delegation Examples
 
+### Detection Logging (Silent Mode)
+
+When delegation is disabled (default), detection still runs and logs results for monitoring accuracy:
+
+**Console Output:**
+```
+## Starting: US-003 - Add user profile API endpoint
+
+Story type detected: api
+Detection signals: { api: 3, backend: 3, frontend: 0, database: 0, devops: 0 }
+
+**Goal:** Create GET /api/users/:id endpoint
+...
+```
+
+**prd.json Updated:**
+```json
+{
+  "id": "US-003",
+  "title": "Add user profile API endpoint",
+  "detectedType": "api",
+  "delegatedTo": null,  // null because delegation.enabled = false
+  "passes": false
+}
+```
+
+**progress.md Logged:**
+```markdown
+## Story Analysis
+
+- Detected type: api
+- Confidence signals: { api: 3, backend: 3, frontend: 0 }
+
+## Implementation
+
+[Implementation details...]
+```
+
+This silent logging allows validating detection accuracy before enabling delegation.
+
+---
+
 ### Story Type Detection
 
 Examples of how different stories are classified:

@@ -76,3 +76,39 @@ Started: 2026-01-18
 
 ---
 
+## 2026-01-18 17:15 - US-003: Add detection logging to autonomous agent
+
+**Implementation:**
+- Updated SKILL.md Step 3.0a with detection implementation guidance
+- Added 4-step logging process: run detection, log to console, store in prd.json, update progress.md
+- Added example output showing detection in action
+- Created silent mode logging example in examples.md
+
+**Key Points:**
+- Detection runs automatically during Phase 3, Step 3.0a
+- Logs detected type and confidence signals to console
+- Stores `detectedType` field in prd.json for each story
+- Does NOT trigger delegation unless `delegation.enabled = true`
+- Allows testing detection accuracy before enabling delegation
+
+**Example Implementation:**
+```javascript
+const detectedType = detectStoryType(currentStory);
+console.log(`Story type detected: ${detectedType}`);
+currentStory.detectedType = detectedType;
+```
+
+**Files Changed:**
+- SKILL.md - Enhanced Step 3.0a with logging guidance
+- references/examples.md - Added detection logging example
+- prd.json - Updated US-003 status
+
+**Verification:**
+- Detection logging guidance in SKILL.md: ✓
+- Console format specified: ✓
+- prd.json field documented: ✓
+- Example added to examples.md: ✓
+- Emphasizes silent mode (no delegation yet): ✓
+
+---
+

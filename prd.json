@@ -1,0 +1,298 @@
+{
+  "project": "Smart Delegation Rollout",
+  "branchName": "feature/smart-delegation-rollout",
+  "description": "Implement phased rollout of smart delegation feature with testing, validation, and monitoring",
+  "createdAt": "2026-01-18T16:30:00Z",
+  "delegation": {
+    "enabled": false,
+    "fallbackToDirect": true
+  },
+  "verification": {
+    "typecheck": "echo 'No typecheck for documentation project'",
+    "test": "echo 'No tests for documentation project'",
+    "lint": "echo 'No lint for documentation project'"
+  },
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create detection test suite",
+      "description": "As a developer, I want a comprehensive test suite for the story type detection function so that I can validate accuracy before deployment.",
+      "acceptanceCriteria": [
+        "Test file created at references/detection-test-suite.js with 25+ test cases",
+        "Test cases cover all 6 story types (frontend, api, database, devops, fullstack, general)",
+        "Each test case includes: story data, expected type, reasoning",
+        "Test runner validates detection against expected results",
+        "Test suite produces accuracy percentage report",
+        "Test cases match those documented in detection-validation.md"
+      ],
+      "priority": 1,
+      "dependsOn": [],
+      "passes": true,
+      "attempts": 1,
+      "notes": "Created test suite with 27 test cases. Initial accuracy: 85.2%",
+      "detectedType": "database",
+      "delegatedTo": null,
+      "completedAt": "2026-01-18T16:45:00Z"
+    },
+    {
+      "id": "US-002",
+      "title": "Validate detection against test cases",
+      "description": "As a developer, I want to run the detection test suite and validate accuracy so that I can identify patterns that need tuning.",
+      "acceptanceCriteria": [
+        "Detection function extracted from SKILL.md into testable module",
+        "Test suite runs successfully against detection function",
+        "Accuracy report shows results per category (frontend, api, database, etc.)",
+        "Overall accuracy is >85% (target: >90%)",
+        "Misclassifications are logged with reasoning",
+        "Recommendations provided for pattern improvements if accuracy <90%"
+      ],
+      "priority": 2,
+      "dependsOn": ["US-001"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-003",
+      "title": "Add detection logging to autonomous agent",
+      "description": "As a developer, I want the autonomous agent to log detected story types during execution so that I can monitor detection accuracy in real usage.",
+      "acceptanceCriteria": [
+        "Detection runs silently in Phase 3, Step 3.0a (after loading context)",
+        "Detected type is logged to console with format: Story type detected: [type] (signals: {...})",
+        "Detection result is stored in prd.json field: detectedType",
+        "Detection does NOT trigger delegation yet (logging only)",
+        "SKILL.md updated with Step 3.0a implementation",
+        "Example output added to examples.md"
+      ],
+      "priority": 3,
+      "dependsOn": ["US-002"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Detection logic already exists in SKILL.md from previous commit",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-004",
+      "title": "Document detection accuracy metrics",
+      "description": "As a user, I want documentation on detection accuracy metrics so that I understand the reliability of story type classification.",
+      "acceptanceCriteria": [
+        "Accuracy report added to references/detection-validation.md",
+        "Report includes: per-category accuracy, overall accuracy, common misclassifications",
+        "Recommendations documented for improving story descriptions to aid detection",
+        "Edge cases and limitations clearly documented",
+        "Table showing accuracy goals per category (frontend >95%, API >90%, etc.)"
+      ],
+      "priority": 4,
+      "dependsOn": ["US-002", "US-003"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-005",
+      "title": "Add delegation configuration to prd.json schema",
+      "description": "As a user, I want to enable delegation via prd.json configuration so that I can opt into the feature when ready.",
+      "acceptanceCriteria": [
+        "prd.json schema documented in SKILL.md Phase 2",
+        "Schema includes delegation object with: enabled (boolean), fallbackToDirect (boolean)",
+        "Schema includes story-level fields: detectedType (string), delegatedTo (string|null)",
+        "Example prd.json with delegation configuration in examples.md",
+        "Default values: delegation.enabled = false, delegation.fallbackToDirect = true",
+        "Documentation explains each field's purpose"
+      ],
+      "priority": 5,
+      "dependsOn": [],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Schema already added in previous commit, needs documentation review",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-006",
+      "title": "Implement agent selection logic",
+      "description": "As a developer, I want agent selection logic that maps detected story types to specialized agents so that delegation can route to the correct specialist.",
+      "acceptanceCriteria": [
+        "Agent selection map defined in SKILL.md Step 3.2",
+        "Map includes: frontend→frontend-agent, api→api-agent, database→database-agent, devops→devops-agent, fullstack→orchestrator-fullstack, general→general-purpose",
+        "Selection logic checks if agent is available before delegating",
+        "Falls back to general-purpose if specific agent not found",
+        "Agent selection is logged: Selected agent: [agent-type]",
+        "Code examples show selection process"
+      ],
+      "priority": 6,
+      "dependsOn": ["US-003"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Logic already implemented, needs documentation refinement",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-007",
+      "title": "Create subagent prompt generator",
+      "description": "As a developer, I want a prompt template that provides subagents with focused context so that they can implement stories effectively.",
+      "acceptanceCriteria": [
+        "Prompt template documented in SKILL.md Step 3.2",
+        "Template includes: story details, acceptance criteria, scope constraints, project context",
+        "Template includes: AGENTS.md patterns, recent progress, memory insights",
+        "Template specifies required output format for subagent results",
+        "Scope constraints explicitly prohibit: implementing other stories, refactoring unrelated code, creating docs unless required",
+        "Example prompts shown for each agent type in examples.md"
+      ],
+      "priority": 7,
+      "dependsOn": ["US-006"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Template exists in agent-prompts.md, needs integration into SKILL.md",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-008",
+      "title": "Add result parsing and validation",
+      "description": "As a developer, I want to parse and validate subagent results so that the orchestrator can verify successful implementation.",
+      "acceptanceCriteria": [
+        "Result parsing function documented in SKILL.md Step 3.3",
+        "Parser extracts: success status, files changed, verification results, implementation notes",
+        "Parser validates required output format from subagent",
+        "Validation checks: all acceptance criteria addressed, verification passed, files changed are reasonable",
+        "Error handling for malformed subagent output",
+        "Example parsing logic shown in SKILL.md"
+      ],
+      "priority": 8,
+      "dependsOn": ["US-007"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Parsing logic already in SKILL.md, needs validation examples",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-009",
+      "title": "Implement fallback mechanism",
+      "description": "As a user, I want automatic fallback to direct implementation if delegation fails so that the autonomous loop continues reliably.",
+      "acceptanceCriteria": [
+        "Fallback logic documented in SKILL.md Step 3.2",
+        "Fallback triggers when: agent not available, agent returns failure, verification fails",
+        "Fallback respects delegation.fallbackToDirect configuration",
+        "Fallback is logged: ⚠ Delegation failed, falling back to direct implementation",
+        "If fallback disabled, user is prompted with options: enable fallback, skip story, pause",
+        "Story metadata tracks whether it was delegated or direct: delegatedTo: null for direct"
+      ],
+      "priority": 9,
+      "dependsOn": ["US-008"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Fallback already implemented, needs error scenario documentation",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-010",
+      "title": "Add delegation metrics tracking",
+      "description": "As a developer, I want metrics tracked in prd.json so that I can analyze delegation performance over time.",
+      "acceptanceCriteria": [
+        "prd.json schema includes delegationMetrics object",
+        "Metrics tracked: total stories, delegated count, success rate, average attempts, by-agent breakdown",
+        "Metrics include: detection accuracy (manual validation), most common types detected",
+        "Metrics automatically updated after each story completion",
+        "Example metrics shown in examples.md",
+        "Metrics format allows easy analysis with jq"
+      ],
+      "priority": 10,
+      "dependsOn": ["US-005", "US-009"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-011",
+      "title": "Create beta flag for opt-in testing",
+      "description": "As a user, I want clear documentation on enabling beta delegation so that I can test the feature safely in my projects.",
+      "acceptanceCriteria": [
+        "Documentation section 'Enabling Delegation (Beta)' added to SKILL.md",
+        "Section explains: how to enable in prd.json, what to expect, how to disable",
+        "Beta warning included: This is a beta feature. Fallback to direct implementation is automatic.",
+        "Checklist for beta testing: enable flag, install agents (optional), run on test PRD, review metrics",
+        "Troubleshooting section for common issues: agent not found, delegation failure",
+        "Link to examples of delegation in action"
+      ],
+      "priority": 11,
+      "dependsOn": ["US-010"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-012",
+      "title": "Document delegation usage in examples",
+      "description": "As a user, I want comprehensive examples showing delegation in action so that I understand how it works in practice.",
+      "acceptanceCriteria": [
+        "Complete delegation flow example in examples.md showing: detection, selection, delegation, results",
+        "Example for each story type: frontend, api, database, devops, fullstack, general",
+        "Example prd.json with completed delegated stories",
+        "Example progress.md showing delegation statistics",
+        "Example showing successful delegation vs fallback scenarios",
+        "Example showing delegation metrics analysis"
+      ],
+      "priority": 12,
+      "dependsOn": ["US-011"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Examples already exist, need to expand with metrics",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-013",
+      "title": "Add monitoring and error reporting",
+      "description": "As a developer, I want delegation errors and patterns logged to progress.md so that I can debug issues and improve detection.",
+      "acceptanceCriteria": [
+        "Delegation attempts logged in progress.md with: story ID, detected type, agent used, attempt number, duration",
+        "Delegation failures logged with: error message, agent type, fallback action taken",
+        "Progress.md includes delegation statistics section at top",
+        "Misdetection patterns logged: Story detected as X but should be Y",
+        "Learnings section captures: agent-specific patterns, common failure modes",
+        "Example progress.md with delegation logging in examples.md"
+      ],
+      "priority": 13,
+      "dependsOn": ["US-012"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "",
+      "detectedType": null,
+      "delegatedTo": null
+    },
+    {
+      "id": "US-014",
+      "title": "Update SKILL.md with complete delegation guide",
+      "description": "As a user, I want comprehensive documentation of the delegation feature so that I understand all capabilities and configurations.",
+      "acceptanceCriteria": [
+        "All delegation-related sections in SKILL.md are complete and accurate",
+        "Table of contents includes delegation sections",
+        "Configuration reference table shows all delegation options",
+        "Agent type reference table shows type→agent mappings",
+        "Troubleshooting section covers: detection issues, agent availability, fallback scenarios",
+        "Migration guide explains enabling delegation in existing projects",
+        "Links to all relevant examples and references"
+      ],
+      "priority": 14,
+      "dependsOn": ["US-001", "US-002", "US-003", "US-004", "US-005", "US-006", "US-007", "US-008", "US-009", "US-010", "US-011", "US-012", "US-013"],
+      "passes": false,
+      "attempts": 0,
+      "notes": "Final documentation pass after all features complete",
+      "detectedType": null,
+      "delegatedTo": null
+    }
+  ]
+}

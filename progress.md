@@ -421,3 +421,74 @@ Falling back to direct implementation...
 
 ---
 
+## 2026-01-18 19:00 - US-010: Add delegation metrics tracking
+
+**Implementation:**
+- Added delegationMetrics schema to SKILL.md prd.json template (lines 305-314)
+- Documented all 8 metrics fields with explanations (lines 344-370)
+- Created updateDelegationMetrics function for automatic updates (lines 376-413)
+- Added 4 jq query examples to SKILL.md (lines 416-430)
+- Enhanced prd.json example in examples.md with metrics (lines 376-394)
+- Added comprehensive metrics querying section to examples.md (lines 605-657)
+
+**Metrics Schema Added:**
+
+```json
+{
+  "delegationMetrics": {
+    "totalStories": 0,          // Total completed
+    "delegatedCount": 0,        // Delegated to agents
+    "directCount": 0,           // Direct implementation
+    "successRate": 0,           // % passing on first attempt
+    "avgAttempts": 0,           // Average attempts per story
+    "byAgent": {},              // Per-agent performance
+    "byType": {},               // Story type distribution
+    "detectionAccuracy": null   // Manual validation (optional)
+  }
+}
+```
+
+**Auto-Update Function:**
+- Increments totalStories, delegatedCount/directCount
+- Updates byAgent breakdown with count, successRate, avgAttempts
+- Updates byType distribution
+- Calculates overall successRate (first-attempt passes)
+- Calculates avgAttempts across all stories
+- Runs after each story completion in Step 3.4
+
+**jq Query Examples Added (6 queries):**
+1. Overall delegation rate with percentage
+2. Agent performance breakdown (count, success, attempts)
+3. Most common story types sorted by frequency
+4. Success rate and average attempts summary
+5. Agents needing improvement (< 80% success)
+6. Detection type distribution
+
+**Insights Enabled:**
+- Identify high/low performing agents
+- Track delegation adoption rate
+- Monitor story type distribution
+- Analyze quality metrics (success rate, attempts)
+- Guide improvement priorities
+
+**Acceptance Criteria Verified:**
+- ✓ delegationMetrics schema in prd.json (8 fields)
+- ✓ Tracks: total, delegated, success rate, avg attempts, by-agent
+- ✓ Includes: detection accuracy, type distribution
+- ✓ Auto-updates via updateDelegationMetrics function
+- ✓ Example with metrics in examples.md prd.json
+- ✓ jq-friendly format with 6 query examples
+
+**Files Changed:**
+- SKILL.md - Added metrics schema, update function, jq queries
+- references/examples.md - Added metrics to prd.json example, querying section
+- prd.json - Updated US-010 status
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Schema comprehensive: ✓ (8 fields)
+- jq queries functional: ✓ (6 examples)
+- Auto-update logic documented: ✓
+
+---
+

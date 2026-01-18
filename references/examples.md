@@ -373,6 +373,25 @@ Complete example with delegation fields:
     "enabled": true,
     "fallbackToDirect": true
   },
+  "delegationMetrics": {
+    "totalStories": 3,
+    "delegatedCount": 3,
+    "directCount": 0,
+    "successRate": 67,
+    "avgAttempts": 1.33,
+    "byAgent": {
+      "database-agent": { "count": 1, "successRate": 100, "avgAttempts": 1.0 },
+      "api-agent": { "count": 1, "successRate": 100, "avgAttempts": 1.0 },
+      "frontend-agent": { "count": 1, "successRate": 0, "avgAttempts": 2.0 }
+    },
+    "byType": {
+      "database": 1,
+      "api": 1,
+      "frontend": 1,
+      "fullstack": 1
+    },
+    "detectionAccuracy": null
+  },
   "verification": {
     "typecheck": "npm run typecheck",
     "test": "npm run test"
@@ -582,6 +601,59 @@ To enable smart delegation in your project:
    - Detection happens automatically in Step 3.0a
    - Delegation occurs in Step 3.2 if enabled
    - Falls back to direct implementation if agent unavailable
+
+### Querying Delegation Metrics
+
+After running autonomous-dev with delegation enabled, analyze performance with jq:
+
+**Overall delegation rate:**
+```bash
+jq '.delegationMetrics | "Delegation: \(.delegatedCount)/\(.totalStories) (\((.delegatedCount/.totalStories*100)|round)%)"' prd.json
+# Output: Delegation: 3/3 (100%)
+```
+
+**Agent performance breakdown:**
+```bash
+jq '.delegationMetrics.byAgent | to_entries | .[] | "\(.key): \(.value.count) stories, \(.value.successRate)% success, \(.value.avgAttempts) avg attempts"' prd.json
+# Output:
+# database-agent: 1 stories, 100% success, 1.0 avg attempts
+# api-agent: 1 stories, 100% success, 1.0 avg attempts
+# frontend-agent: 1 stories, 0% success, 2.0 avg attempts
+```
+
+**Most common story types:**
+```bash
+jq '.delegationMetrics.byType | to_entries | sort_by(-.value) | .[] | "\(.key): \(.value) stories"' prd.json
+# Output:
+# database: 1 stories
+# api: 1 stories
+# frontend: 1 stories
+# fullstack: 1 stories
+```
+
+**Success metrics:**
+```bash
+jq '.delegationMetrics | "Success rate: \(.successRate)% | Avg attempts: \(.avgAttempts)"' prd.json
+# Output: Success rate: 67% | Avg attempts: 1.33
+```
+
+**Which agents need improvement:**
+```bash
+jq '.delegationMetrics.byAgent | to_entries | map(select(.value.successRate < 80)) | .[] | "\(.key): \(.value.successRate)% success rate"' prd.json
+# Output: frontend-agent: 0% success rate
+```
+
+**Detection type distribution:**
+```bash
+jq '.delegationMetrics.byType | to_entries | map("\(.key): \(.value)") | join(", ")' prd.json
+# Output: database: 1, api: 1, frontend: 1, fullstack: 1
+```
+
+These metrics help identify:
+- Which agents are performing well vs. struggling
+- Most common story types in your workflow
+- Overall delegation success and quality
+- Where to focus improvement efforts
 
 ---
 

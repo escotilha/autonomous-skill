@@ -302,6 +302,16 @@ fi
     "enabled": false,
     "fallbackToDirect": true
   },
+  "delegationMetrics": {
+    "totalStories": 0,
+    "delegatedCount": 0,
+    "directCount": 0,
+    "successRate": 0,
+    "avgAttempts": 0,
+    "byAgent": {},
+    "byType": {},
+    "detectionAccuracy": null
+  },
   "userStories": [
     {
       "id": "US-001",
@@ -330,6 +340,94 @@ fi
 - `delegation.fallbackToDirect`: If `true`, falls back to direct implementation when delegation fails
 - `detectedType`: Automatically populated with story type (frontend, api, database, devops, fullstack, general)
 - `delegatedTo`: Records which agent implemented the story (e.g., "frontend-agent", "api-agent", or null for direct implementation)
+
+**Delegation Metrics:**
+
+Automatically tracked performance metrics:
+
+- `totalStories`: Total number of stories completed
+- `delegatedCount`: Number of stories delegated to agents
+- `directCount`: Number of stories implemented directly
+- `successRate`: Percentage of stories that passed on first attempt (0-100)
+- `avgAttempts`: Average number of attempts per story
+- `byAgent`: Breakdown by agent type:
+  ```json
+  {
+    "frontend-agent": { "count": 3, "successRate": 100, "avgAttempts": 1.0 },
+    "api-agent": { "count": 2, "successRate": 50, "avgAttempts": 1.5 },
+    "direct": { "count": 1, "successRate": 100, "avgAttempts": 1.0 }
+  }
+  ```
+- `byType`: Breakdown by detected story type:
+  ```json
+  {
+    "frontend": 3,
+    "api": 2,
+    "database": 1,
+    "general": 1
+  }
+  ```
+- `detectionAccuracy`: Manual validation results (optional, set by user review)
+
+**Updating Metrics:**
+
+After each story completion, update delegationMetrics:
+
+```javascript
+function updateDelegationMetrics(prd, story) {
+  const metrics = prd.delegationMetrics || {
+    totalStories: 0, delegatedCount: 0, directCount: 0,
+    successRate: 0, avgAttempts: 0, byAgent: {}, byType: {}
+  };
+
+  // Update totals
+  metrics.totalStories++;
+  if (story.delegatedTo) {
+    metrics.delegatedCount++;
+  } else {
+    metrics.directCount++;
+  }
+
+  // Update by-agent breakdown
+  const agentKey = story.delegatedTo || 'direct';
+  if (!metrics.byAgent[agentKey]) {
+    metrics.byAgent[agentKey] = { count: 0, successRate: 0, avgAttempts: 0 };
+  }
+  metrics.byAgent[agentKey].count++;
+
+  // Update by-type breakdown
+  if (story.detectedType) {
+    metrics.byType[story.detectedType] = (metrics.byType[story.detectedType] || 0) + 1;
+  }
+
+  // Calculate overall success rate (first attempt pass)
+  const allStories = prd.userStories.filter(s => s.passes);
+  const firstAttemptSuccess = allStories.filter(s => s.attempts === 1).length;
+  metrics.successRate = Math.round((firstAttemptSuccess / allStories.length) * 100);
+
+  // Calculate average attempts
+  const totalAttempts = allStories.reduce((sum, s) => sum + s.attempts, 0);
+  metrics.avgAttempts = (totalAttempts / allStories.length).toFixed(2);
+
+  prd.delegationMetrics = metrics;
+}
+```
+
+**Querying Metrics with jq:**
+
+```bash
+# Overall delegation rate
+jq '.delegationMetrics | "Delegation: \(.delegatedCount)/\(.totalStories) (\((.delegatedCount/.totalStories*100)|round)%)"' prd.json
+
+# Agent performance
+jq '.delegationMetrics.byAgent | to_entries | .[] | "\(.key): \(.value.count) stories, \(.value.successRate)% success"' prd.json
+
+# Most common story types
+jq '.delegationMetrics.byType | to_entries | sort_by(-.value) | .[] | "\(.key): \(.value)"' prd.json
+
+# Success rate trend
+jq '.delegationMetrics | "Success rate: \(.successRate)% | Avg attempts: \(.avgAttempts)"' prd.json
+```
 
 ### Step 2.4: Initialize Progress File
 

@@ -233,11 +233,12 @@
         "US-005",
         "US-009"
       ],
-      "passes": false,
-      "attempts": 0,
-      "notes": "",
-      "detectedType": null,
-      "delegatedTo": null
+      "passes": true,
+      "attempts": 1,
+      "notes": "Added delegationMetrics schema to SKILL.md with 8 fields tracking performance. Created updateDelegationMetrics function to auto-update after each story. Added metrics to prd.json example in examples.md. Provided 6 jq query examples for analysis: delegation rate, agent performance, story types, success metrics, agent improvement needs, type distribution.",
+      "detectedType": "backend",
+      "delegatedTo": null,
+      "completedAt": "2026-01-18T19:00:00Z"
     },
     {
       "id": "US-011",

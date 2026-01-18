@@ -1424,6 +1424,166 @@ When you discover patterns, add them to AGENTS.md:
 
 ---
 
+## Enabling Delegation (Beta)
+
+**⚠️ BETA FEATURE:** Smart delegation is currently in beta. Automatic fallback to direct implementation ensures reliable operation.
+
+### How to Enable
+
+1. **Update prd.json:**
+   ```json
+   {
+     "delegation": {
+       "enabled": true,
+       "fallbackToDirect": true
+     }
+   }
+   ```
+
+2. **Install specialized agents** (optional but recommended):
+   ```bash
+   # Frontend agent for UI/component work
+   git clone https://github.com/org/frontend-agent ~/.claude/skills/frontend-agent
+
+   # API agent for endpoint implementation
+   git clone https://github.com/org/api-agent ~/.claude/skills/api-agent
+
+   # Database agent for schema/migrations
+   git clone https://github.com/org/database-agent ~/.claude/skills/database-agent
+
+   # DevOps agent for CI/CD and deployment
+   git clone https://github.com/org/devops-agent ~/.claude/skills/devops-agent
+   ```
+
+   **Note:** If agents aren't installed, delegation falls back to direct implementation automatically.
+
+3. **Run autonomous-dev as normal:**
+   - Story type detection runs automatically (Step 3.0a)
+   - Delegation attempts if enabled and agent available (Step 3.2)
+   - Falls back to direct implementation on any failure
+   - Tracks metrics in `prd.json` (delegationMetrics)
+
+### What to Expect
+
+**With delegation enabled:**
+- Each story is analyzed to detect type (frontend, api, database, etc.)
+- Appropriate specialized agent is selected
+- Agent implements the story with domain-specific expertise
+- Fallback to direct implementation if agent unavailable or fails
+- Metrics tracked for performance analysis
+
+**Logging output:**
+```
+## Starting: US-003 - Add dark mode toggle
+
+Story type detected: frontend
+Selected agent: frontend-agent
+
+Delegating to frontend-agent...
+
+✓ Created app/components/ThemeToggle.tsx
+✓ Typecheck passed
+✓ Tests passed (2/2)
+
+RESULT: SUCCESS
+
+✓ US-003 complete (attempt 1)
+  Implemented by: frontend-agent
+```
+
+### How to Disable
+
+Set `delegation.enabled` to `false` in prd.json:
+```json
+{
+  "delegation": {
+    "enabled": false
+  }
+}
+```
+
+The autonomous loop continues with direct implementation.
+
+### Beta Testing Checklist
+
+- [ ] Enable delegation in a test PRD (non-production project)
+- [ ] Run autonomous loop on 5-10 stories
+- [ ] Review delegationMetrics in prd.json
+- [ ] Check which agents performed well vs. needed fallback
+- [ ] Review progress.md for delegation logs
+- [ ] Verify fallback mechanism works (try without agents installed)
+- [ ] Analyze metrics with jq queries (see examples.md)
+- [ ] Report any issues or unexpected behavior
+
+### Troubleshooting
+
+**Issue: "Agent not found" error**
+- **Cause:** Specialized agent skill not installed
+- **Solution:** Either install the agent or rely on automatic fallback
+- **Expected:** Delegation falls back to direct implementation automatically
+
+**Issue: Delegation fails repeatedly for specific story type**
+- **Cause:** Agent may not handle this pattern well
+- **Solution:** Review progress.md logs, consider disabling delegation for that agent type
+- **Temporary fix:** Implement story directly, file issue with agent maintainer
+
+**Issue: Detection classifies story incorrectly**
+- **Cause:** Story description lacks clear technical keywords
+- **Solution:** Add specific keywords (e.g., "component", "endpoint", "migration")
+- **Alternative:** Set `detectedType` manually in prd.json before running
+
+**Issue: Metrics not updating**
+- **Cause:** delegationMetrics object missing from prd.json
+- **Solution:** Add empty metrics object (see schema in Phase 2 documentation)
+
+**Issue: Want to force direct implementation for one story**
+- **Solution:** Set `delegation.enabled = false` temporarily, or
+- **Better:** Let delegation attempt and fallback if needed (no manual intervention required)
+
+### Migration Guide: Enabling in Existing Projects
+
+If you have an existing prd.json without delegation:
+
+1. **Add delegation configuration:**
+   ```json
+   {
+     "delegation": {
+       "enabled": true,
+       "fallbackToDirect": true
+     },
+     "delegationMetrics": {
+       "totalStories": 0,
+       "delegatedCount": 0,
+       "directCount": 0,
+       "successRate": 0,
+       "avgAttempts": 0,
+       "byAgent": {},
+       "byType": {},
+       "detectionAccuracy": null
+     }
+   }
+   ```
+
+2. **Add story-level fields** (optional - will be populated automatically):
+   ```json
+   {
+     "id": "US-001",
+     "detectedType": null,
+     "delegatedTo": null
+   }
+   ```
+
+3. **Run autonomous loop** - delegation activates automatically for remaining stories
+
+### See Also
+
+- [Detection validation](references/detection-validation.md) - Detection accuracy testing
+- [Agent prompts](references/agent-prompts.md) - Subagent prompt templates
+- [Examples](references/examples.md) - Complete delegation flow examples
+- [Design doc](references/smart-delegation-design.md) - Architecture details
+
+---
+
 ## Examples
 
 See [references/examples.md](references/examples.md) for:

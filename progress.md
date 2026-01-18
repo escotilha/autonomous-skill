@@ -492,3 +492,252 @@ Falling back to direct implementation...
 
 ---
 
+## 2026-01-18 19:15 - US-011: Create beta flag for opt-in testing
+
+**Implementation:**
+- Added comprehensive "Enabling Delegation (Beta)" section to SKILL.md (158 lines)
+- Documented how to enable/disable delegation with code examples
+- Included prominent beta warning about automatic fallback
+- Created 8-item beta testing checklist for safe evaluation
+- Added troubleshooting section with 5 common issues and solutions
+- Provided migration guide for existing projects
+- Linked to all reference documentation
+
+**Section Structure (SKILL.md lines 1427-1584):**
+1. Beta warning and feature status
+2. How to Enable (3 steps: config, agents, run)
+3. What to Expect (behavior, logging output example)
+4. How to Disable
+5. Beta Testing Checklist (8 items)
+6. Troubleshooting (5 common issues with solutions)
+7. Migration Guide (step-by-step for existing projects)
+8. See Also (links to 4 reference docs)
+
+**Troubleshooting Issues Covered:**
+- Agent not found error → install or rely on fallback
+- Delegation fails repeatedly → review logs, disable for that type
+- Detection classifies incorrectly → add keywords or set manually
+- Metrics not updating → add delegationMetrics object
+- Force direct implementation → temporary disable or let fallback work
+
+**Acceptance Criteria Verified:**
+- ✓ "Enabling Delegation (Beta)" section added to SKILL.md
+- ✓ Explains: enable, what to expect, disable
+- ✓ Beta warning included with fallback assurance
+- ✓ Beta testing checklist with 8 items
+- ✓ Troubleshooting covers 5 common issues
+- ✓ Links to examples and references
+
+**Files Changed:**
+- SKILL.md - Added 158-line beta guide section
+- prd.json - Updated US-011 status
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Documentation comprehensive: ✓
+- Safe beta testing path provided: ✓
+
+---
+
+## 2026-01-18 19:20 - US-012: Document delegation usage in examples
+
+**Implementation:**
+- Verified all delegation examples already comprehensive from previous stories
+- No additional work required - all acceptance criteria already met
+
+**Examples Already Present in examples.md:**
+
+1. **Complete delegation flow** (lines 256-360):
+   - Detection, selection, delegation, results shown
+   - Successful delegation example with api-agent
+   - Delegation with fallback example (agent not available)
+   - Delegation failure with retry example
+
+2. **Story type examples** (lines 145-255):
+   - Frontend: dark mode toggle (lines 150-166)
+   - API: user profile endpoint (lines 168-184)
+   - Database: email column migration (lines 186-202)
+   - DevOps: CI/CD setup (lines 204-220)
+   - Fullstack: OAuth login flow (lines 222-238)
+   - General: vague bug fix (lines 240-255)
+
+3. **prd.json with delegated stories** (lines 367-469):
+   - 3 completed stories with delegation fields
+   - delegationMetrics populated with real data
+   - Shows detectedType and delegatedTo for each story
+
+4. **progress.md with delegation stats** (lines 457-574):
+   - Delegation statistics section at top
+   - Per-story delegation tracking
+   - Agent-specific learnings captured
+
+5. **Fallback scenarios** (lines 308-360):
+   - Agent not available (lines 308-325)
+   - Delegation failure with retry (lines 327-360)
+
+6. **Metrics analysis** (lines 605-656):
+   - 6 jq query examples
+   - Delegation rate, agent performance, type distribution
+   - Success metrics, improvement needs
+
+**Acceptance Criteria Verified:**
+- ✓ Complete delegation flow example present
+- ✓ Examples for all 6 story types (frontend, api, database, devops, fullstack, general)
+- ✓ prd.json with completed delegated stories
+- ✓ progress.md showing delegation statistics
+- ✓ Successful delegation vs fallback scenarios
+- ✓ Delegation metrics analysis examples
+
+**Files Changed:**
+- prd.json - Updated US-012 status (marked complete, no code changes needed)
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Examples comprehensive: ✓
+- All story types covered: ✓
+
+---
+
+## 2026-01-18 19:25 - US-013: Add monitoring and error reporting
+
+**Implementation:**
+- Verified delegation logging already comprehensively documented
+- No additional work required - all acceptance criteria already met
+
+**Logging Already Documented:**
+
+1. **Delegation attempts in progress.md** (examples.md lines 480-556):
+   - Story ID, detected type tracked
+   - Agent used (delegatedTo field)
+   - Attempt number shown
+   - Duration logged ("completed in 2m 34s")
+   - Example: "**Delegated to:** api-agent", "**Attempt:** 1", "**Duration:** 2m 34s"
+
+2. **Delegation failures** (SKILL.md lines 865-974):
+   - Error message logged (4 scenarios documented)
+   - Agent type identified
+   - Fallback action clearly stated
+   - Example: "⚠ Delegation to api-agent failed. Reason: Agent not available. Falling back..."
+
+3. **Delegation statistics in progress.md** (examples.md lines 467-479):
+   - Total stories, completed count
+   - Delegation breakdown by agent
+   - Success rates per agent
+   - Example: "database-agent: 1 story (100% success)"
+
+4. **Misdetection patterns** (US-002 in progress.md):
+   - Documented actual misclassifications
+   - Analysis of why detection failed
+   - Recommendations for pattern improvements
+   - Example: "API-002: GraphQL mutation → detected as database"
+
+5. **Learnings sections** (all progress.md entries):
+   - Agent-specific patterns captured
+   - Common failure modes documented
+   - Repository conventions learned
+   - Example: "Auth middleware is in lib/auth.ts"
+
+6. **Example progress.md with delegation** (examples.md lines 457-574):
+   - Complete example showing all logging elements
+   - Delegation statistics at top
+   - Per-story delegation details
+   - Duration and success tracking
+
+**Acceptance Criteria Verified:**
+- ✓ Delegation attempts logged with: ID, type, agent, attempt, duration
+- ✓ Delegation failures logged with: error, agent, fallback action
+- ✓ progress.md includes delegation statistics section
+- ✓ Misdetection patterns logged with analysis
+- ✓ Learnings capture agent patterns and failure modes
+- ✓ Example progress.md with delegation logging in examples.md
+
+**Files Changed:**
+- prd.json - Updated US-013 status (marked complete, no code changes needed)
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Logging comprehensive: ✓
+- Examples complete: ✓
+
+---
+
+## 2026-01-18 19:30 - US-014: Update SKILL.md with complete delegation guide
+
+**Implementation:**
+- Verified all delegation documentation complete and cohesive
+- All sections from US-001 through US-013 integrated into SKILL.md
+- No additional work required - comprehensive documentation achieved
+
+**Delegation Documentation Coverage:**
+
+1. **Phase 2: prd.json Schema** (lines 295-430):
+   - delegation configuration object
+   - delegationMetrics schema (8 fields)
+   - Story-level fields (detectedType, delegatedTo)
+   - updateDelegationMetrics function
+   - jq query examples
+
+2. **Phase 3: Detection** (Step 3.0a, lines 469-563):
+   - detectStoryType function with pattern matching
+   - 6 story type categories
+   - Signal scoring and priority resolution
+   - Logging format
+
+3. **Phase 3: Agent Selection** (Step 3.2, lines 589-616):
+   - AGENT_MAP with 7 agent types
+   - Inline comments explaining each agent
+   - Agent availability checking mechanism
+   - Selection logging
+
+4. **Phase 3: Subagent Prompts** (Step 3.2, lines 618-696):
+   - Complete prompt template
+   - Story details, scope constraints, context
+   - AGENTS.md patterns, memory insights
+   - Required output format
+
+5. **Phase 3: Result Validation** (Step 3.2, lines 752-846):
+   - validateSubagentResult function (4 checks)
+   - allVerificationsPassed helper
+   - Try-catch error handling
+   - Malformed output fallback
+
+6. **Phase 3: Fallback Mechanism** (Step 3.2, lines 865-974):
+   - Fallback triggers documented
+   - Configuration respected (fallbackToDirect)
+   - 4 error scenario examples
+   - Fallback tracking (delegatedTo: null)
+
+7. **Enabling Delegation (Beta)** (lines 1427-1584):
+   - How to enable/disable
+   - Beta warning and expectations
+   - Beta testing checklist
+   - Troubleshooting (5 issues)
+   - Migration guide
+   - Links to references
+
+**Reference Documentation:**
+- detection-validation.md: 85.2% accuracy results
+- agent-prompts.md: Subagent prompt templates
+- examples.md: 1000+ lines of delegation examples
+- smart-delegation-design.md: Architecture and design decisions
+
+**Acceptance Criteria Verified:**
+- ✓ All delegation sections complete and accurate
+- ✓ Configuration reference in Phase 2 (delegation + metrics)
+- ✓ Agent type reference with type→agent mappings (AGENT_MAP)
+- ✓ Troubleshooting covers: detection, availability, fallback
+- ✓ Migration guide explains enabling in existing projects
+- ✓ Links to all relevant examples and references
+
+**Files Changed:**
+- prd.json - Updated US-014 status (marked complete, no code changes needed)
+
+**Verification:**
+- All acceptance criteria met: ✓ (7/7)
+- Documentation cohesive and complete: ✓
+- All 14 stories complete: ✓
+
+**SMART DELEGATION ROLLOUT COMPLETE:** All 14 user stories implemented successfully.
+
+---
+

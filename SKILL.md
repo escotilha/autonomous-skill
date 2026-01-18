@@ -749,6 +749,102 @@ If `delegationEnabled === true`:
    const parsed = parseSubagentResult(result);
    ```
 
+   **Validate Parsed Result:**
+
+   ```javascript
+   function validateSubagentResult(parsed, story) {
+     const errors = [];
+
+     // 1. Check required fields present
+     if (parsed.success === undefined) {
+       errors.push('Missing RESULT status');
+     }
+
+     if (!parsed.filesChanged || parsed.filesChanged.length === 0) {
+       errors.push('No files changed reported');
+     }
+
+     if (!parsed.verification || Object.keys(parsed.verification).length === 0) {
+       errors.push('No verification results reported');
+     }
+
+     // 2. Validate verification results format
+     for (const [key, value] of Object.entries(parsed.verification)) {
+       if (value !== 'PASS' && value !== 'FAIL') {
+         errors.push(`Invalid verification status for ${key}: ${value}`);
+       }
+     }
+
+     // 3. Check files changed are reasonable
+     const suspiciousFiles = parsed.filesChanged.filter(file =>
+       file.includes('node_modules/') ||
+       file.includes('.git/') ||
+       file.includes('package-lock.json') ||
+       file.match(/\.(env|secret|key)$/)
+     );
+
+     if (suspiciousFiles.length > 0) {
+       errors.push(`Suspicious files modified: ${suspiciousFiles.join(', ')}`);
+     }
+
+     // 4. Validate file paths exist or are new
+     for (const file of parsed.filesChanged) {
+       const isNew = file.includes('(new)');
+       const filePath = file.replace(/\s*\(new\|modified\)/, '').trim();
+       // Note: File existence check would happen here
+       // if (!isNew && !fileExists(filePath)) {
+       //   errors.push(`File not found: ${filePath}`);
+       // }
+     }
+
+     return {
+       valid: errors.length === 0,
+       errors
+     };
+   }
+
+   function allVerificationsPassed(verification) {
+     return Object.values(verification).every(status => status === 'PASS');
+   }
+
+   // Validate result
+   const validation = validateSubagentResult(parsed, story);
+
+   if (!validation.valid) {
+     console.error('⚠ Subagent result validation failed:');
+     validation.errors.forEach(err => console.error(`  - ${err}`));
+     // Treat as delegation failure
+     parsed.success = false;
+   }
+   ```
+
+   **Error Handling for Malformed Output:**
+
+   ```javascript
+   try {
+     const parsed = parseSubagentResult(result);
+     const validation = validateSubagentResult(parsed, story);
+
+     if (!validation.valid) {
+       throw new Error(`Validation failed: ${validation.errors.join('; ')}`);
+     }
+   } catch (error) {
+     console.error(`✗ Failed to parse subagent output: ${error.message}`);
+
+     // Log raw output for debugging
+     console.log('Raw subagent output:');
+     console.log(result.substring(0, 500)); // First 500 chars
+
+     // Trigger fallback
+     if (fallbackToDirect) {
+       console.log('⚠ Falling back to direct implementation...');
+       // Proceed to Option B
+     } else {
+       throw error;
+     }
+   }
+   ```
+
 5. **Handle Delegation Result:**
 
    If delegation **succeeds**:

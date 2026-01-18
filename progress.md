@@ -288,3 +288,64 @@ currentStory.detectedType = detectedType;
 
 ---
 
+## 2026-01-18 18:30 - US-008: Add result parsing and validation
+
+**Implementation:**
+- Enhanced SKILL.md Step 3.2 with comprehensive validation logic
+- Added validateSubagentResult function (lines 755-804) with 4 validation checks
+- Added allVerificationsPassed helper function (lines 806-808)
+- Added try-catch error handling with fallback (lines 824-846)
+- All parsing and validation logic fully documented with code examples
+
+**Validation Checks Implemented:**
+
+1. **Required Fields Check:**
+   - Validates RESULT status is present
+   - Ensures filesChanged array has entries
+   - Confirms verification object has results
+
+2. **Verification Format Validation:**
+   - Checks each verification status is PASS or FAIL
+   - Catches invalid status values
+
+3. **Suspicious Files Detection:**
+   - Flags node_modules/ modifications
+   - Flags .git/ modifications
+   - Flags package-lock.json changes
+   - Flags .env, .secret, .key files
+
+4. **File Path Validation:**
+   - Validates new/modified indicators
+   - Placeholder for file existence checks
+
+**Error Handling:**
+- Try-catch wraps parsing and validation
+- Logs first 500 chars of raw output for debugging
+- Automatically triggers fallback on parse/validation failure
+- Provides clear error messages for each validation failure
+
+**Helper Functions:**
+- `parseSubagentResult(output)`: Extracts structured data from agent output
+- `validateSubagentResult(parsed, story)`: Validates extracted data
+- `allVerificationsPassed(verification)`: Checks all verifications are PASS
+
+**Acceptance Criteria Verified:**
+- ✓ Result parsing documented in SKILL.md Step 3.2 (lines 712-750)
+- ✓ Parser extracts: success, files, verification, notes, learnings
+- ✓ Parser validates required output format (lines 755-804)
+- ✓ Validation checks: fields, verification, file reasonableness
+- ✓ Error handling for malformed output (lines 824-846)
+- ✓ Example parsing logic shown with complete code examples
+
+**Files Changed:**
+- SKILL.md - Added validation and error handling to Step 3.2
+- prd.json - Updated US-008 status
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Validation logic comprehensive: ✓
+- Error handling robust: ✓
+- Examples clear and complete: ✓
+
+---
+

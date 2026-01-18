@@ -186,3 +186,49 @@ currentStory.detectedType = detectedType;
 
 ---
 
+## 2026-01-18 18:00 - US-006: Implement agent selection logic
+
+**Implementation:**
+- Refined SKILL.md Step 3.2 agent selection documentation (lines 589-616)
+- Added inline comments to AGENT_MAP explaining purpose of each agent type
+- Enhanced logging section with template variables
+- Clarified agent availability checking mechanism (via Task tool + fallback)
+- Enhanced fallback documentation with common failure reasons (lines 768-787)
+- Verified examples.md has comprehensive delegation flow examples
+
+**Enhancements Made:**
+
+1. **Agent Map Documentation:**
+   - Added inline comments for all 7 agent types
+   - Clarified each agent's specialization area
+   - Made mapping more readable and maintainable
+
+2. **Availability Checking:**
+   - Documented that availability is checked when Task tool is invoked
+   - Agent skill not found triggers automatic fallback
+   - Fallback mechanism provides recovery for unavailable agents
+
+3. **Fallback Logic:**
+   - Listed 4 common failure reasons
+   - Explained automatic recovery scenarios
+   - Clarified when `general-purpose` serves as ultimate fallback
+
+**Acceptance Criteria Verified:**
+- ✓ Agent selection map defined in SKILL.md Step 3.2
+- ✓ Map includes all 7 required agent types with descriptions
+- ✓ Availability checking via Task tool documented
+- ✓ Fallback to general-purpose explained (2 mechanisms)
+- ✓ Agent selection logging format specified
+- ✓ Code examples comprehensive in examples.md (lines 256-360)
+
+**Files Changed:**
+- SKILL.md - Enhanced agent selection and fallback documentation
+- prd.json - Updated US-006 status
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Documentation clear and comprehensive: ✓
+- Examples support all scenarios: ✓
+
+---
+

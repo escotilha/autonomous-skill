@@ -589,26 +589,30 @@ If `delegationEnabled === true`:
 1. **Select Specialized Agent:**
 
    ```javascript
+   // Agent type mapping: story type → specialized agent skill
    const AGENT_MAP = {
-     'frontend': 'frontend-agent',
-     'backend': 'backend-agent',
-     'api': 'api-agent',
-     'database': 'database-agent',
-     'devops': 'devops-agent',
-     'fullstack': 'orchestrator-fullstack',
-     'general': 'general-purpose'
+     'frontend': 'frontend-agent',      // UI/component work
+     'backend': 'backend-agent',        // Server-side logic (alias for api)
+     'api': 'api-agent',                // REST/GraphQL endpoints
+     'database': 'database-agent',      // Schema, migrations, queries
+     'devops': 'devops-agent',          // CI/CD, deployment, infrastructure
+     'fullstack': 'orchestrator-fullstack', // Multi-layer features
+     'general': 'general-purpose'       // Catch-all for unclear stories
    };
 
    const storyType = detectStoryType(story); // From Step 3.0a
    const agentType = AGENT_MAP[storyType] || 'general-purpose';
+
+   // Note: Agent availability is checked when Task tool is invoked
+   // If agent skill is not installed, Task will fail and trigger fallback
    ```
 
-   **Announce delegation:**
+   **Log agent selection:**
    ```
-   Detected story type: [storyType]
-   Selected agent: [agentType]
+   Detected story type: ${storyType}
+   Selected agent: ${agentType}
 
-   Delegating to [agentType]...
+   Delegating to ${agentType}...
    ```
 
 2. **Generate Subagent Context:**
@@ -762,13 +766,25 @@ If `delegationEnabled === true`:
    ```
 
    If delegation **fails** and `fallbackToDirect === true`:
+
+   **Common failure reasons:**
+   - Agent skill not installed/available
+   - Agent returned FAILURE result
+   - Verification commands failed
+   - Task tool error
+
    ```
    ⚠ Delegation to ${agentType} failed.
-   Error: ${parsed.notes}
+   Reason: ${getFailureReason(result)}
 
    Falling back to direct implementation...
    ```
    → Proceed to Option B (Direct Implementation)
+
+   **Note:** The fallback mechanism provides automatic recovery when:
+   - Selected agent is not installed (`general-purpose` always available as ultimate fallback)
+   - Agent fails to implement the story correctly
+   - Verification fails after delegation
 
    If delegation **fails** and `fallbackToDirect === false`:
    ```

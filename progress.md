@@ -112,3 +112,44 @@ currentStory.detectedType = detectedType;
 
 ---
 
+## 2026-01-18 17:30 - US-004: Document detection accuracy metrics
+
+**Implementation:**
+- Updated `references/detection-validation.md` with actual test results
+- Added comprehensive results table by category with target vs actual
+- Documented strengths (100% for frontend/database/devops) and weaknesses (fullstack 66.7%, general 50%)
+- Included detailed failure analysis for all 4 misclassifications
+- Provided deployment readiness assessment and recommended improvements
+
+**Accuracy Results:**
+- Overall: 85.2% (23/27) - Acceptable (>85%), below target (>90%)
+- Perfect: Frontend (100%), Database (100%), DevOps (100%)
+- Good: API (80%)
+- Weak: Fullstack (66.7%), General (50%)
+
+**Key Findings:**
+- Single-domain stories: Excellent classification
+- Multi-domain stories: Challenging due to signal overlap
+- Vague stories: Trigger false positives
+- Ready for beta with automatic fallback
+
+**Recommendations Documented:**
+1. Add GraphQL to API patterns (high priority)
+2. Add real-time/WebSocket to fullstack patterns (medium priority)
+3. Add vagueness detection (medium priority)
+
+**Files Changed:**
+- references/detection-validation.md - Added actual results section
+- prd.json - Updated US-004 status
+
+**Verification:**
+- Accuracy report in detection-validation.md: ✓
+- Per-category results: ✓ (all 6 categories)
+- Common misclassifications documented: ✓ (4 failures)
+- Edge cases documented: ✓
+- Accuracy goals table: ✓ (target vs actual)
+
+**Phase 1 Complete:** All detection testing and validation stories finished (US-001 through US-004).
+
+---
+

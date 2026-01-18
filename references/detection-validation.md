@@ -352,6 +352,68 @@ Based on manual validation:
 
 **Overall Target:** >90% accuracy on well-written stories
 
+---
+
+## Actual Test Results (2026-01-18)
+
+**Test Suite:** `references/detection-test-suite.js`
+**Test Cases:** 27 stories across all 6 types
+**Overall Accuracy:** 85.2% (23/27 passed)
+
+### Results by Category
+
+| Category | Target | Actual | Status | Notes |
+|----------|--------|--------|--------|-------|
+| Frontend | >95% | **100%** (6/6) | ✅ **Exceeds** | Perfect classification |
+| API | >90% | **80%** (4/5) | ❌ **Below** | GraphQL misclassified as database |
+| Database | >95% | **100%** (5/5) | ✅ **Exceeds** | Perfect classification |
+| DevOps | >85% | **100%** (4/4) | ✅ **Exceeds** | Perfect classification |
+| Fullstack | >75% | **66.7%** (2/3) | ❌ **Below** | Real-time chat misclassified |
+| General | >80% | **50%** (2/4) | ❌ **Below** | Vague stories trigger false positives |
+| **Overall** | **>90%** | **85.2%** | ⚠️ **Acceptable** | Above minimum (>85%), below target |
+
+### Summary
+
+**✅ Strengths:**
+- Excellent performance on single-domain stories (frontend, database, devops all 100%)
+- Strong pattern recognition for distinct keywords
+- Reliable classification when stories are well-written
+
+**⚠️ Weaknesses:**
+- Multi-domain stories (fullstack) challenging due to overlapping signals
+- Vague general stories sometimes trigger false positives
+- GraphQL keyword unexpectedly matched database patterns
+
+**🔧 Recommended Improvements:**
+1. Add GraphQL patterns to API detection (high priority)
+2. Add real-time/WebSocket patterns to fullstack detection (medium priority)
+3. Add vagueness detection for generic refactor/performance stories (medium priority)
+
+**📊 Deployment Status:**
+- **Ready for beta:** Yes (with automatic fallback enabled)
+- **Ready for default-on:** No (need >90% overall accuracy)
+- **Next steps:** Implement 3 pattern improvements, re-test, then beta deploy
+
+### Detailed Failures
+
+**1. API-002: GraphQL Mutation** (api → database)
+- Missing GraphQL in API patterns
+- Fix: Add `/\b(graphql|mutation|query|resolver)\b/` to apiPatterns
+
+**2. FS-003: Real-time Chat** (fullstack → database)
+- Missing real-time indicators in fullstack patterns
+- Fix: Add `/\b(real.time|websocket|sse|live updates)\b/` to fullstackPatterns
+
+**3. GEN-003: Auth Refactoring** (backend → api)
+- Refactor stories should prefer general when vague
+- Fix: If `maxScore < 2` and "refactor" present, return 'general'
+
+**4. GEN-004: Performance** (general → frontend)
+- Generic performance should stay general
+- Fix: If `maxScore < 2` and "performance" present, return 'general'
+
+---
+
 ## Validation Checklist
 
 To validate detection logic on a new story:

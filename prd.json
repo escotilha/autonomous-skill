@@ -163,11 +163,12 @@
       "dependsOn": [
         "US-006"
       ],
-      "passes": false,
-      "attempts": 0,
-      "notes": "Template exists in agent-prompts.md, needs integration into SKILL.md",
-      "detectedType": null,
-      "delegatedTo": null
+      "passes": true,
+      "attempts": 1,
+      "notes": "Enhanced prompt template in SKILL.md Step 3.2 with documentation constraint. Updated agent-prompts.md base template. Added 4 comprehensive agent-specific prompt examples to examples.md (frontend, api, database, devops) showing how context is tailored per specialization.",
+      "detectedType": "documentation",
+      "delegatedTo": null,
+      "completedAt": "2026-01-18T18:15:00Z"
     },
     {
       "id": "US-008",

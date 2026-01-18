@@ -15,6 +15,7 @@ You are implementing a single user story for the autonomous-dev orchestrator.
 - Refactor unrelated code
 - Add features beyond acceptance criteria
 - Create unnecessary abstractions
+- Create documentation unless explicitly required by acceptance criteria
 
 ## Story Details
 **ID:** ${story.id}
@@ -327,6 +328,7 @@ You are implementing a single user story for the autonomous-dev orchestrator.
 - Refactor unrelated code
 - Add features beyond acceptance criteria
 - Create unnecessary abstractions
+- Create documentation unless explicitly required by acceptance criteria
 
 ## Story Details
 **ID:** US-004

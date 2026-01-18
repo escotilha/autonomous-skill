@@ -630,6 +630,7 @@ If `delegationEnabled === true`:
    - Refactor unrelated code
    - Add features beyond acceptance criteria
    - Create unnecessary abstractions
+   - Create documentation unless explicitly required by acceptance criteria
 
    ## Story Details
    **ID:** ${story.id}

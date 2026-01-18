@@ -582,3 +582,460 @@ To enable smart delegation in your project:
    - Detection happens automatically in Step 3.0a
    - Delegation occurs in Step 3.2 if enabled
    - Falls back to direct implementation if agent unavailable
+
+---
+
+## Agent-Specific Prompt Examples
+
+These examples show the actual prompts generated for different agent types, demonstrating how context is tailored to each specialization.
+
+### Frontend Agent Prompt Example
+
+When delegating a UI component story to frontend-agent:
+
+```markdown
+# Story Implementation Task
+
+You are implementing a single user story for the autonomous-dev orchestrator.
+
+## Scope Constraints
+**ONLY implement this specific story.** Do not:
+- Implement other stories from the PRD
+- Refactor unrelated code
+- Add features beyond acceptance criteria
+- Create unnecessary abstractions
+- Create documentation unless explicitly required by acceptance criteria
+
+## Story Details
+**ID:** US-003
+**Title:** Add dark mode toggle to settings page
+**Priority:** 3
+
+**Description:**
+As a user, I want a dark mode toggle button in settings so I can switch themes.
+
+**Acceptance Criteria:**
+- [ ] Toggle button renders on settings page
+- [ ] Clicking toggle switches theme between light/dark
+- [ ] Theme preference persists in localStorage
+- [ ] Typecheck passes
+- [ ] Component is accessible (ARIA labels)
+
+## Project Context
+**Tech Stack:** Next.js 14, React, TypeScript, Tailwind CSS
+**Branch:** feature/dark-mode
+**Working Directory:** /Users/dev/project
+
+**Verification Commands:**
+- typecheck: `npm run typecheck`
+- test: `npm run test`
+
+## Repository Patterns
+**Component Structure:** Components live in `app/components/`
+**Styling:** Tailwind CSS with `className`, avoid inline styles
+**State:** Use React hooks (useState, useEffect)
+**Event Handlers:** Name with `handleX` pattern (handleToggle, handleClick)
+
+## Frontend Specific Context
+
+**Component Structure:**
+- app/components/Button.tsx
+- app/components/Settings/
+- app/layout.tsx
+
+**Routing:**
+Next.js App Router (app directory)
+
+**State Management:**
+React Context API for theme
+
+**Styling Approach:**
+Tailwind CSS
+
+**Common Patterns:**
+- Component composition: Small, focused components
+- Props interface location: Defined inline with component
+- Event handler naming: handleClick, handleToggle, handleSubmit
+
+## Frontend Checklist
+
+In addition to base requirements:
+- [ ] Component is accessible (ARIA labels, keyboard navigation)
+- [ ] Responsive design (mobile, tablet, desktop)
+- [ ] Loading and error states handled
+- [ ] Props have TypeScript interfaces
+- [ ] No prop drilling (use context if needed)
+
+## Recent Implementation Context
+Last 3 stories implemented similar UI components with Button base component.
+
+## Memory Insights
+Patterns to apply:
+- Use existing Button component from app/components/
+- Theme context is in app/providers/ThemeProvider.tsx
+
+Mistakes to avoid:
+- Don't forget to add ARIA labels for accessibility
+- localStorage access must be client-side only (useEffect)
+
+## Your Task
+1. Read relevant existing code
+2. Implement ONLY what's needed for this story
+3. Run verification commands
+4. Report structured results
+
+## Required Output Format
+\`\`\`
+RESULT: [SUCCESS|FAILURE]
+
+Files changed:
+- path/to/file1.ts (new/modified)
+
+Verification:
+- Typecheck: [PASS|FAIL]
+- Tests: [PASS|FAIL - X/Y passed]
+
+Implementation notes:
+[2-3 sentences describing key decisions]
+
+Learnings:
+[Patterns discovered or issues encountered]
+\`\`\`
+```
+
+### API Agent Prompt Example
+
+When delegating an endpoint creation story to api-agent:
+
+```markdown
+# Story Implementation Task
+
+## Scope Constraints
+**ONLY implement this specific story.** Do not:
+- Implement other stories from the PRD
+- Refactor unrelated code
+- Add features beyond acceptance criteria
+- Create unnecessary abstractions
+- Create documentation unless explicitly required by acceptance criteria
+
+## Story Details
+**ID:** US-002
+**Title:** Create GET /api/users/:id endpoint
+**Priority:** 2
+
+**Description:**
+As a frontend developer, I want GET /api/users/:id so I can fetch user profiles.
+
+**Acceptance Criteria:**
+- [ ] GET /api/users/:id returns user object with id, name, email
+- [ ] Returns 404 if user not found
+- [ ] Returns 401 if not authenticated
+- [ ] Typecheck passes
+- [ ] API tests pass
+
+## Project Context
+**Tech Stack:** Next.js 14 API Routes, Supabase, TypeScript
+**Branch:** feature/user-api
+
+**Verification Commands:**
+- typecheck: `npm run typecheck`
+- test: `npm run test:api`
+
+## Repository Patterns
+**API Convention:** Next.js API routes in `app/api/`
+**Auth Pattern:** JWT tokens, middleware in `lib/auth.ts`
+**Error Format:** `{ error: string, code: number }`
+
+## API Specific Context
+
+**Existing Endpoints:**
+- GET /api/users (list all users)
+- POST /api/auth/login
+- POST /api/auth/logout
+
+**API Convention:**
+REST (Next.js API routes)
+
+**Middleware Stack:**
+- Authentication: lib/auth.ts `requireAuth` middleware
+- Error handling: lib/errors.ts
+
+**Authentication:**
+JWT tokens in Authorization header
+
+**Error Response Format:**
+\`\`\`json
+{ "error": "User not found", "code": 404 }
+\`\`\`
+
+**Example Endpoint:**
+\`\`\`typescript
+// app/api/users/route.ts
+import { requireAuth } from '@/lib/auth';
+
+export async function GET(request: Request) {
+  const user = await requireAuth(request);
+  const users = await db.users.findMany();
+  return Response.json(users);
+}
+\`\`\`
+
+## API Checklist
+
+In addition to base requirements:
+- [ ] Input validation (path parameters validated)
+- [ ] Authentication/authorization checked
+- [ ] Error responses follow format
+- [ ] Status codes are correct (200, 404, 401)
+- [ ] Request/response types defined
+- [ ] Rate limiting considered (if applicable)
+
+## Memory Insights
+Patterns to apply:
+- Use requireAuth middleware for protected routes
+- Supabase client from lib/supabase.ts
+
+Mistakes to avoid:
+- Don't expose sensitive fields (passwordHash, etc.)
+- Always validate user ID format before querying
+
+## Your Task
+1. Read relevant existing code
+2. Implement ONLY what's needed for this story
+3. Run verification commands
+4. Report structured results
+
+## Required Output Format
+\`\`\`
+RESULT: [SUCCESS|FAILURE]
+
+Files changed:
+- app/api/users/[id]/route.ts (new)
+
+Verification:
+- Typecheck: PASS
+- Tests: PASS - 3/3 passed
+
+Implementation notes:
+Created dynamic route for user profile fetching. Used requireAuth middleware and Supabase query.
+
+Learnings:
+Need to parse UUID format for user ID validation.
+\`\`\`
+```
+
+### Database Agent Prompt Example
+
+When delegating a schema change story to database-agent:
+
+```markdown
+# Story Implementation Task
+
+## Scope Constraints
+**ONLY implement this specific story.** Do not:
+- Implement other stories from the PRD
+- Refactor unrelated code
+- Add features beyond acceptance criteria
+- Create unnecessary abstractions
+- Create documentation unless explicitly required by acceptance criteria
+
+## Story Details
+**ID:** US-001
+**Title:** Add email column to users table
+**Priority:** 1
+
+**Description:**
+As a developer, I need an email field in the users schema with unique constraint.
+
+**Acceptance Criteria:**
+- [ ] Migration adds email column to users table
+- [ ] Email is unique and required
+- [ ] Migration is reversible (down migration)
+- [ ] Migration runs successfully
+- [ ] No data loss
+
+## Project Context
+**Tech Stack:** PostgreSQL, Drizzle ORM, TypeScript
+**Branch:** feature/user-email
+
+**Verification Commands:**
+- migration: `npm run db:migrate`
+- typecheck: `npm run typecheck`
+
+## Repository Patterns
+**Migrations:** SQL files in `db/migrations/`
+**Naming:** `YYYYMMDDHHMMSS_description.sql`
+
+## Database Specific Context
+
+**ORM/Query Builder:**
+Drizzle ORM
+
+**Database:**
+PostgreSQL 15
+
+**Existing Schema:**
+\`\`\`sql
+CREATE TABLE users (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  name TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+\`\`\`
+
+**Migration Pattern:**
+SQL files with -- Up and -- Down sections
+
+**Naming Conventions:**
+- Tables: snake_case plural
+- Columns: snake_case
+- Indexes: idx_tablename_columnname
+
+## Database Checklist
+
+In addition to base requirements:
+- [ ] Migration is reversible (down migration provided)
+- [ ] Indexes added for query performance
+- [ ] Foreign key constraints set correctly
+- [ ] Default values specified where needed
+- [ ] Migration tested (up and down)
+- [ ] No data loss in migrations
+
+## Memory Insights
+Patterns to apply:
+- Always add updated_at trigger when modifying schema
+- Use UNIQUE constraint, not unique index
+
+Mistakes to avoid:
+- Don't forget down migration
+- Test rollback before committing
+
+## Your Task
+1. Read existing schema files
+2. Create migration file
+3. Test up and down migrations
+4. Report results
+
+## Required Output Format
+\`\`\`
+RESULT: SUCCESS
+
+Files changed:
+- db/migrations/20260118120000_add_user_email.sql (new)
+
+Verification:
+- Migration up: PASS
+- Migration down: PASS
+- Typecheck: PASS
+
+Implementation notes:
+Added email column with UNIQUE constraint and NOT NULL. Down migration drops column safely.
+
+Learnings:
+Need to handle existing users (added default for migration).
+\`\`\`
+```
+
+### DevOps Agent Prompt Example
+
+When delegating a CI/CD story to devops-agent:
+
+```markdown
+# Story Implementation Task
+
+## Scope Constraints
+**ONLY implement this specific story.** Do not:
+- Implement other stories from the PRD
+- Refactor unrelated code
+- Add features beyond acceptance criteria
+- Create unnecessary abstractions
+- Create documentation unless explicitly required by acceptance criteria
+
+## Story Details
+**ID:** US-004
+**Title:** Set up GitHub Actions for testing
+**Priority:** 4
+
+**Description:**
+As a team, we want automated tests on every PR to catch issues early.
+
+**Acceptance Criteria:**
+- [ ] GitHub Actions workflow runs on every PR
+- [ ] Workflow runs typecheck and tests
+- [ ] PR fails if tests fail
+- [ ] Workflow caches dependencies for speed
+
+## Project Context
+**Tech Stack:** Node.js 20, npm, TypeScript
+**Branch:** feature/ci-workflow
+
+**Verification Commands:**
+- typecheck: `npm run typecheck`
+- test: `npm run test`
+
+## DevOps Specific Context
+
+**Deployment Target:**
+Vercel (production)
+
+**CI/CD:**
+GitHub Actions (setting up)
+
+**Existing Workflows:**
+None (this is the first)
+
+**Environment Variables:**
+DATABASE_URL (required for tests)
+API_KEY (required for integration tests)
+
+**Container Setup:**
+No Docker configuration found
+
+## DevOps Checklist
+
+In addition to base requirements:
+- [ ] Environment variables documented in .env.example
+- [ ] No secrets committed to repo
+- [ ] Build process tested locally
+- [ ] Deployment steps documented
+- [ ] Rollback procedure considered
+- [ ] Health checks added (if applicable)
+
+## Memory Insights
+Patterns to apply:
+- Use actions/cache for node_modules
+- Set up test database with Docker service
+
+Mistakes to avoid:
+- Don't commit secrets to workflow file
+- Always test workflow locally with act
+
+## Your Task
+1. Create GitHub Actions workflow file
+2. Configure test database
+3. Test workflow runs
+4. Report results
+
+## Required Output Format
+\`\`\`
+RESULT: SUCCESS
+
+Files changed:
+- .github/workflows/test.yml (new)
+- .env.example (updated with test vars)
+
+Verification:
+- Workflow syntax: PASS
+- Local test run: PASS
+- PR test run: PASS
+
+Implementation notes:
+Created workflow with Node 20 setup, dependency caching, and test database via Docker service container.
+
+Learnings:
+Need to use service containers for PostgreSQL in CI.
+\`\`\`
+```
+
+These examples show how agent-specific context (component structure, API patterns, schema details, CI/CD config) is injected into the base template to provide specialized agents with relevant information for their domain.

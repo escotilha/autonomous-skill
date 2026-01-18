@@ -232,3 +232,59 @@ currentStory.detectedType = detectedType;
 
 ---
 
+## 2026-01-18 18:15 - US-007: Create subagent prompt generator
+
+**Implementation:**
+- Enhanced prompt template in SKILL.md Step 3.2 (lines 618-696)
+- Added documentation constraint to scope prohibitions (line 633)
+- Updated agent-prompts.md base template with same constraint
+- Added 4 comprehensive agent-specific prompt examples to examples.md
+
+**Agent-Specific Examples Added:**
+
+1. **Frontend Agent Example** (lines 592-704):
+   - Shows UI component story delegation
+   - Includes frontend-specific context (component structure, routing, state management, styling)
+   - Demonstrates accessibility and responsive design checklist
+   - Example output with RESULT format
+
+2. **API Agent Example** (lines 706-825):
+   - Shows REST endpoint creation story
+   - Includes API-specific context (existing endpoints, auth patterns, error formats)
+   - Demonstrates input validation and status code requirements
+   - Example output with authentication integration
+
+3. **Database Agent Example** (lines 827-938):
+   - Shows schema migration story
+   - Includes database-specific context (ORM, existing schema, naming conventions)
+   - Demonstrates reversible migration requirements
+   - Example output with up/down migration testing
+
+4. **DevOps Agent Example** (lines 940-1039):
+   - Shows CI/CD workflow setup story
+   - Includes devops-specific context (deployment target, environment variables)
+   - Demonstrates workflow configuration and testing
+   - Example output with service container setup
+
+**Acceptance Criteria Verified:**
+- ✓ Prompt template documented in SKILL.md Step 3.2 (lines 618-696)
+- ✓ Template includes story details, criteria, constraints, context
+- ✓ Template includes AGENTS.md patterns, progress, memory insights
+- ✓ Required output format specified (RESULT, files, verification, notes)
+- ✓ Scope constraints prohibit: other stories, refactoring, unnecessary docs
+- ✓ Example prompts for 4 agent types in examples.md (456 lines added)
+
+**Files Changed:**
+- SKILL.md - Added documentation constraint to scope
+- references/agent-prompts.md - Updated base template with constraint
+- references/examples.md - Added 4 agent-specific prompt examples
+- prd.json - Updated US-007 status
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Prompt template comprehensive: ✓
+- Agent-specific context shown: ✓ (4 agent types)
+- Examples demonstrate tailored context: ✓
+
+---
+

@@ -298,6 +298,10 @@ fi
   "branchName": "feature/[feature-name]",
   "description": "[Feature description]",
   "createdAt": "2024-01-15T10:00:00Z",
+  "delegation": {
+    "enabled": false,
+    "fallbackToDirect": true
+  },
   "userStories": [
     {
       "id": "US-001",
@@ -312,11 +316,20 @@ fi
       "dependsOn": [],
       "passes": false,
       "attempts": 0,
-      "notes": ""
+      "notes": "",
+      "detectedType": null,
+      "delegatedTo": null
     }
   ]
 }
 ```
+
+**Delegation Configuration:**
+
+- `delegation.enabled`: Set to `true` to enable smart delegation to specialized agents
+- `delegation.fallbackToDirect`: If `true`, falls back to direct implementation when delegation fails
+- `detectedType`: Automatically populated with story type (frontend, api, database, devops, fullstack, general)
+- `delegatedTo`: Records which agent implemented the story (e.g., "frontend-agent", "api-agent", or null for direct implementation)
 
 ### Step 2.4: Initialize Progress File
 
@@ -392,6 +405,120 @@ mcp__memory__search_nodes({ query: "pattern" })               # Apply known patt
 
 Find the next story: first `passes: false` ordered by `priority`, respecting `dependsOn`.
 
+### Step 3.0a: Analyze Story Type (Smart Delegation)
+
+Before implementing, detect the story type to enable smart delegation.
+
+**Story Type Detection:**
+
+Analyze the story to determine its primary type:
+
+```javascript
+function detectStoryType(story) {
+  const fullText = [
+    story.title,
+    story.description,
+    ...story.acceptanceCriteria,
+    story.notes || ''
+  ].join(' ').toLowerCase();
+
+  const signals = {
+    frontend: 0,
+    backend: 0,
+    api: 0,
+    database: 0,
+    devops: 0,
+    fullstack: 0
+  };
+
+  // Frontend patterns
+  const frontendPatterns = [
+    /\b(component|ui|page|form|button|modal|dropdown|layout|widget)\b/,
+    /\b(react|vue|angular|svelte|next\.js|nuxt)\b/,
+    /\b(css|style|theme|responsive|mobile|desktop)\b/,
+    /\b(click|hover|animation|transition|render)\b/,
+    /\/(components|pages|app|views|layouts)\//,
+    /\.(tsx|jsx|vue|svelte)$/
+  ];
+
+  // API patterns
+  const apiPatterns = [
+    /\b(endpoint|route|api|rest|graphql)\b/,
+    /\b(get|post|put|delete|patch)\s+(request|endpoint)/,
+    /\b(middleware|authentication|authorization)\b/,
+    /\b(controller|service|handler)\b/,
+    /\/(api|routes|controllers|services)\//,
+    /\b(express|fastapi|flask|django|nestjs)\b/
+  ];
+
+  // Database patterns
+  const databasePatterns = [
+    /\b(database|schema|migration|table|column|index)\b/,
+    /\b(query|sql|postgres|mysql|mongodb|supabase)\b/,
+    /\b(orm|prisma|drizzle|sequelize|mongoose)\b/,
+    /\b(rls|row level security|foreign key|constraint)\b/,
+    /\/(migrations|schema|models|entities)\//,
+    /\b(create table|alter table|add column)\b/
+  ];
+
+  // DevOps patterns
+  const devopsPatterns = [
+    /\b(deploy|deployment|ci\/cd|docker|kubernetes|container)\b/,
+    /\b(github actions|gitlab ci|jenkins|vercel|railway)\b/,
+    /\b(environment variable|config|secrets|env)\b/,
+    /\b(build|bundle|webpack|vite|rollup)\b/,
+    /\.(dockerfile|yaml|yml|\.github\/workflows)$/,
+    /\b(nginx|apache|load balancer|cdn)\b/
+  ];
+
+  // Fullstack patterns (touches multiple layers)
+  const fullstackPatterns = [
+    /\b(end.to.end|e2e|full.stack|complete feature)\b/,
+    /\b(authentication system|oauth flow|signup flow)\b/,
+    /\b(frontend.*backend|backend.*frontend)\b/,
+    /\b(database.*ui|ui.*database)\b/
+  ];
+
+  // Score each category
+  frontendPatterns.forEach(p => { if (p.test(fullText)) signals.frontend++; });
+  apiPatterns.forEach(p => { if (p.test(fullText)) signals.api++; });
+  databasePatterns.forEach(p => { if (p.test(fullText)) signals.database++; });
+  devopsPatterns.forEach(p => { if (p.test(fullText)) signals.devops++; });
+  fullstackPatterns.forEach(p => { if (p.test(fullText)) signals.fullstack++; });
+
+  // API is subset of backend
+  if (signals.api > 0) signals.backend = signals.api;
+
+  // Determine primary type
+  const maxScore = Math.max(...Object.values(signals));
+
+  if (signals.fullstack >= 2) return 'fullstack';
+  if (maxScore === 0) return 'general'; // No clear signals
+
+  // Return highest scoring type (priority order if tied)
+  const priority = ['database', 'api', 'backend', 'frontend', 'devops'];
+  for (const type of priority) {
+    if (signals[type] === maxScore) {
+      return type;
+    }
+  }
+
+  return 'general';
+}
+```
+
+**Detection in Action:**
+
+```
+Story analysis for US-003:
+- Title: "Add user profile API endpoint"
+- Keywords found: "endpoint", "API"
+- Detected type: API
+- Signals: { api: 3, backend: 3, frontend: 0, database: 0 }
+```
+
+**Note:** This detection runs silently for now. Full delegation requires `delegation.enabled = true` in prd.json (see Phase 2 setup).
+
 ### Step 3.1: Announce Task
 
 ```
@@ -407,7 +534,219 @@ Find the next story: first `passes: false` ordered by `priority`, respecting `de
 **Approach:** [2-3 sentences on how you'll implement this]
 ```
 
-### Step 3.2: Implement Code
+### Step 3.2: Implement Code (with Smart Delegation)
+
+**Check Delegation Status:**
+
+```javascript
+const delegationEnabled = prd.delegation?.enabled === true;
+const fallbackToDirect = prd.delegation?.fallbackToDirect !== false;
+```
+
+**Option A: Delegation Enabled**
+
+If `delegationEnabled === true`:
+
+1. **Select Specialized Agent:**
+
+   ```javascript
+   const AGENT_MAP = {
+     'frontend': 'frontend-agent',
+     'backend': 'backend-agent',
+     'api': 'api-agent',
+     'database': 'database-agent',
+     'devops': 'devops-agent',
+     'fullstack': 'orchestrator-fullstack',
+     'general': 'general-purpose'
+   };
+
+   const storyType = detectStoryType(story); // From Step 3.0a
+   const agentType = AGENT_MAP[storyType] || 'general-purpose';
+   ```
+
+   **Announce delegation:**
+   ```
+   Detected story type: [storyType]
+   Selected agent: [agentType]
+
+   Delegating to [agentType]...
+   ```
+
+2. **Generate Subagent Context:**
+
+   Create a detailed prompt for the subagent:
+
+   ```markdown
+   # Story Implementation Task
+
+   You are implementing a single user story for the autonomous-dev orchestrator.
+
+   ## Scope Constraints
+   **ONLY implement this specific story.** Do not:
+   - Implement other stories from the PRD
+   - Refactor unrelated code
+   - Add features beyond acceptance criteria
+   - Create unnecessary abstractions
+
+   ## Story Details
+   **ID:** ${story.id}
+   **Title:** ${story.title}
+   **Priority:** ${story.priority}
+
+   **Description:**
+   ${story.description}
+
+   **Acceptance Criteria:**
+   ${story.acceptanceCriteria.map(c => `- [ ] ${c}`).join('\n')}
+
+   ## Project Context
+   **Tech Stack:** ${detectStack()}
+   **Branch:** ${prd.branchName}
+   **Working Directory:** ${process.cwd()}
+
+   **Verification Commands:**
+   ${Object.entries(prd.verification || {})
+     .map(([type, cmd]) => `- ${type}: \`${cmd}\``)
+     .join('\n')}
+
+   ## Repository Patterns
+   ${readFile('AGENTS.md') || 'No documented patterns yet'}
+
+   ## Recent Implementation Context
+   ${extractRecentProgress(3)} // Last 3 entries from progress.md
+
+   ## Memory Insights
+   Patterns to apply:
+   ${queryMemoryPatterns(detectStack())}
+
+   Mistakes to avoid:
+   ${queryMemoryMistakes()}
+
+   ## Dependencies from Previous Stories
+   ${story.dependsOn.map(id => `- ${id}: ${getPreviousStoryNotes(id)}`).join('\n')}
+
+   ## Your Task
+   1. Read relevant existing code
+   2. Implement ONLY what's needed for this story
+   3. Run verification commands
+   4. Report structured results
+
+   ## Required Output Format
+   ```
+   RESULT: [SUCCESS|FAILURE]
+
+   Files changed:
+   - path/to/file1.ts (new/modified)
+   - path/to/file2.ts (modified)
+
+   Verification:
+   - Typecheck: [PASS|FAIL]
+   - Tests: [PASS|FAIL - X/Y passed]
+   - Lint: [PASS|FAIL]
+
+   Implementation notes:
+   [2-3 sentences describing key decisions]
+
+   Learnings:
+   [Patterns discovered or issues encountered]
+   ```
+   ```
+
+3. **Invoke Subagent:**
+
+   ```javascript
+   const result = await Task({
+     subagent_type: agentType,
+     description: `Implement ${story.id}: ${story.title}`,
+     prompt: subagentPrompt
+   });
+   ```
+
+4. **Parse Subagent Result:**
+
+   ```javascript
+   function parseSubagentResult(output) {
+     // Extract RESULT line
+     const resultMatch = output.match(/RESULT:\s*(SUCCESS|FAILURE)/i);
+
+     // Extract files changed
+     const filesMatch = output.match(/Files changed:\n((?:- .+\n?)+)/);
+     const filesChanged = filesMatch?.[1]
+       ?.split('\n')
+       .filter(l => l.trim())
+       .map(l => l.replace(/^- /, '').trim()) || [];
+
+     // Extract verification results
+     const verificationMatch = output.match(/Verification:\n((?:- .+\n?)+)/);
+     const verification = {};
+     if (verificationMatch) {
+       verificationMatch[1].split('\n').forEach(line => {
+         const match = line.match(/- (\w+): (PASS|FAIL)/i);
+         if (match) verification[match[1].toLowerCase()] = match[2].toUpperCase();
+       });
+     }
+
+     // Extract notes
+     const notesMatch = output.match(/Implementation notes:\n(.+?)(?=\n\n|Learnings:|$)/s);
+     const notes = notesMatch?.[1]?.trim() || '';
+
+     const learningsMatch = output.match(/Learnings:\n(.+?)$/s);
+     const learnings = learningsMatch?.[1]?.trim() || '';
+
+     return {
+       success: resultMatch?.[1]?.toUpperCase() === 'SUCCESS',
+       filesChanged,
+       verification,
+       notes,
+       learnings
+     };
+   }
+
+   const parsed = parseSubagentResult(result);
+   ```
+
+5. **Handle Delegation Result:**
+
+   If delegation **succeeds**:
+   ```javascript
+   if (parsed.success && allVerificationsPassed(parsed.verification)) {
+     // Update story in prd.json
+     story.passes = true;
+     story.delegatedTo = agentType;
+     story.completedAt = new Date().toISOString();
+
+     // Log success
+     console.log(`✓ ${story.id} completed via ${agentType}`);
+
+     // Continue to Step 3.3 (verification)
+   }
+   ```
+
+   If delegation **fails** and `fallbackToDirect === true`:
+   ```
+   ⚠ Delegation to ${agentType} failed.
+   Error: ${parsed.notes}
+
+   Falling back to direct implementation...
+   ```
+   → Proceed to Option B (Direct Implementation)
+
+   If delegation **fails** and `fallbackToDirect === false`:
+   ```
+   ✗ Delegation failed and fallback is disabled.
+
+   Options:
+   1. Enable fallback: Set delegation.fallbackToDirect = true
+   2. Try different agent (manual override)
+   3. Skip this story
+   4. Pause autonomous mode
+
+   What would you like to do?
+   ```
+
+**Option B: Direct Implementation (Default)**
+
+If `delegationEnabled === false` OR delegation failed with fallback:
 
 1. Read relevant existing files first
 2. Follow patterns from `AGENTS.md` and existing code

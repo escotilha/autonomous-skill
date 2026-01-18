@@ -896,6 +896,83 @@ If `delegationEnabled === true`:
    What would you like to do?
    ```
 
+   **Fallback Tracking:**
+
+   When fallback occurs, story metadata reflects direct implementation:
+   ```json
+   {
+     "id": "US-007",
+     "delegatedTo": null,
+     "notes": "Delegation to api-agent failed: agent not available. Fell back to direct implementation."
+   }
+   ```
+
+   **Error Scenario Examples:**
+
+   **Scenario 1: Agent Not Available**
+   ```
+   ## Starting: US-002 - Add user profile endpoint
+
+   Story type detected: api
+   Selected agent: api-agent
+
+   Delegating to api-agent...
+   ✗ Error: Skill 'api-agent' not found
+   ⚠ Delegation to api-agent failed.
+   Reason: Agent skill not installed
+
+   Falling back to direct implementation...
+   ```
+
+   **Scenario 2: Agent Returns FAILURE**
+   ```
+   ## Starting: US-003 - Add email column to users table
+
+   Delegating to database-agent...
+
+   RESULT: FAILURE
+
+   Verification:
+   - Migration up: FAIL - Syntax error on line 12
+
+   ⚠ Delegation to database-agent failed.
+   Reason: Agent returned FAILURE result
+
+   Falling back to direct implementation...
+   ```
+
+   **Scenario 3: Verification Fails**
+   ```
+   ## Starting: US-001 - Add dark mode toggle
+
+   Delegating to frontend-agent...
+
+   RESULT: SUCCESS
+
+   Verification:
+   - Typecheck: FAIL - Type error in ThemeToggle.tsx
+
+   ⚠ Delegation to frontend-agent failed.
+   Reason: Verification commands failed (typecheck: FAIL)
+
+   Falling back to direct implementation...
+   ```
+
+   **Scenario 4: Malformed Output**
+   ```
+   ## Starting: US-005 - Set up CI/CD
+
+   Delegating to devops-agent...
+
+   [Agent output doesn't match expected format]
+
+   ✗ Failed to parse subagent output: Missing RESULT status
+   Raw subagent output:
+   [First 500 characters shown...]
+
+   ⚠ Falling back to direct implementation...
+   ```
+
 **Option B: Direct Implementation (Default)**
 
 If `delegationEnabled === false` OR delegation failed with fallback:

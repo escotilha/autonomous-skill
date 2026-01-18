@@ -349,3 +349,75 @@ currentStory.detectedType = detectedType;
 
 ---
 
+## 2026-01-18 18:45 - US-009: Implement fallback mechanism
+
+**Implementation:**
+- Enhanced SKILL.md Step 3.2 with comprehensive error scenario documentation
+- Added fallback tracking section (lines 899-908)
+- Added 4 concrete error scenario examples (lines 910-974)
+- Documented all fallback triggers, configuration, and logging
+- All fallback logic already implemented from earlier commits
+
+**Error Scenarios Documented:**
+
+1. **Scenario 1: Agent Not Available** (lines 912-925):
+   - Agent skill not installed
+   - Task tool returns "Skill not found" error
+   - Automatic fallback to direct implementation
+   - delegatedTo set to null
+
+2. **Scenario 2: Agent Returns FAILURE** (lines 927-942):
+   - Agent executes but returns RESULT: FAILURE
+   - Verification shows failed checks (e.g., migration syntax error)
+   - Fallback triggered by failure result
+   - Notes capture failure reason
+
+3. **Scenario 3: Verification Fails** (lines 944-959):
+   - Agent returns SUCCESS
+   - Verification commands fail (typecheck, tests, lint)
+   - Fallback triggered despite SUCCESS result
+   - Ensures quality gate maintained
+
+4. **Scenario 4: Malformed Output** (lines 961-974):
+   - Agent output doesn't match expected format
+   - Parse validation catches missing/invalid fields
+   - First 500 chars of raw output logged for debugging
+   - Fallback provides resilience
+
+**Fallback Configuration:**
+- Respects delegation.fallbackToDirect setting (line 865)
+- When true: automatic fallback to direct implementation
+- When false: prompts user with 4 options (lines 886-897)
+- Tracks in story metadata: delegatedTo: null (lines 899-908)
+
+**Logging Format:**
+All scenarios follow consistent format:
+```
+⚠ Delegation to ${agentType} failed.
+Reason: ${specific_reason}
+
+Falling back to direct implementation...
+```
+
+**Acceptance Criteria Verified:**
+- ✓ Fallback logic documented in SKILL.md Step 3.2 (lines 865-974)
+- ✓ Fallback triggers: agent unavailable, failure, verification fails, parse error
+- ✓ Respects delegation.fallbackToDirect configuration
+- ✓ Fallback logging shown in all 4 scenarios
+- ✓ User prompt when fallback disabled (4 options provided)
+- ✓ Story metadata: delegatedTo: null for direct implementation
+
+**Files Changed:**
+- SKILL.md - Added error scenarios and fallback tracking
+- prd.json - Updated US-009 status
+
+**Verification:**
+- All acceptance criteria met: ✓ (6/6)
+- Error scenarios comprehensive: ✓ (4 concrete examples)
+- Fallback logic robust: ✓
+- Configuration respected: ✓
+
+**Phase 2 Complete:** All beta delegation stories finished (US-005 through US-009).
+
+---
+

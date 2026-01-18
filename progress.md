@@ -153,3 +153,36 @@ currentStory.detectedType = detectedType;
 
 ---
 
+## 2026-01-18 17:45 - US-005: Add delegation configuration to prd.json schema
+
+**Implementation:**
+- Reviewed existing delegation schema documentation in SKILL.md Phase 2
+- Verified schema includes all required fields: delegation object (enabled, fallbackToDirect)
+- Verified story-level fields: detectedType, delegatedTo
+- Confirmed complete prd.json example exists in examples.md with delegation configuration
+- Validated default values and field explanations
+
+**Documentation Locations:**
+- SKILL.md lines 301-332: Full prd.json schema with delegation object
+- SKILL.md lines 327-332: Field purpose explanations
+- examples.md lines 367-455: Complete prd.json example with delegation enabled
+- examples.md lines 558-584: "Enabling Delegation" guide
+
+**Acceptance Criteria Verified:**
+- ✓ prd.json schema documented in SKILL.md Phase 2
+- ✓ Schema includes delegation.enabled and delegation.fallbackToDirect
+- ✓ Schema includes detectedType and delegatedTo story fields
+- ✓ Example prd.json with delegation in examples.md
+- ✓ Default values: enabled=false, fallbackToDirect=true
+- ✓ Field purposes explained
+
+**Files Changed:**
+- prd.json - Updated US-005 status
+
+**Verification:**
+- Documentation complete: ✓
+- All acceptance criteria met: ✓ (6/6)
+- Examples comprehensive: ✓
+
+---
+

@@ -117,11 +117,12 @@
       ],
       "priority": 5,
       "dependsOn": [],
-      "passes": false,
-      "attempts": 0,
-      "notes": "Schema already added in previous commit, needs documentation review",
-      "detectedType": null,
-      "delegatedTo": null
+      "passes": true,
+      "attempts": 1,
+      "notes": "Documentation review complete. Schema fully documented in SKILL.md Phase 2 (lines 301-332) with field explanations. Complete example in examples.md (lines 367-455) with enabling instructions.",
+      "detectedType": "documentation",
+      "delegatedTo": null,
+      "completedAt": "2026-01-18T17:45:00Z"
     },
     {
       "id": "US-006",

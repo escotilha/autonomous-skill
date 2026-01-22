@@ -312,6 +312,14 @@ fi
     "byType": {},
     "detectionAccuracy": null
   },
+  "optimization": {
+    "progressSummary": {
+      "enabled": true,
+      "recentStoriesCount": 3,
+      "maxLearnings": 15,
+      "autoGenerate": true
+    }
+  },
   "userStories": [
     {
       "id": "US-001",
@@ -368,6 +376,29 @@ Automatically tracked performance metrics:
   }
   ```
 - `detectionAccuracy`: Manual validation results (optional, set by user review)
+
+**Optimization Configuration:**
+
+Token optimization settings for reducing context size:
+
+- `optimization.progressSummary.enabled`: Enable progress.md summarization (default: `true`)
+- `optimization.progressSummary.recentStoriesCount`: How many recent stories to include in full detail (default: `3`)
+- `optimization.progressSummary.maxLearnings`: Maximum extracted learnings to include (default: `15`)
+- `optimization.progressSummary.autoGenerate`: Auto-regenerate summary after each story (default: `true`)
+
+**Disable Progress Summarization:**
+
+To load full progress.md instead of summary:
+
+```json
+{
+  "optimization": {
+    "progressSummary": {
+      "enabled": false
+    }
+  }
+}
+```
 
 **Updating Metrics:**
 
@@ -472,16 +503,52 @@ Store in prd.json:
 
 **Goal:** Implement one story per iteration until complete.
 
-### Step 3.0: Load Context
+### Step 3.0: Load Context (with Token Optimization)
 
-At the start of EVERY iteration:
+At the start of EVERY iteration, load context efficiently:
 
 ```bash
 # Read current state
 cat prd.json
-cat progress.md
 cat AGENTS.md 2>/dev/null
+
+# Use optimized progress loading (see below)
 ```
+
+**Optimized Progress Loading:**
+
+To reduce token usage, prefer `progress-summary.md` over full `progress.md`:
+
+```javascript
+function loadProgressContext(prd) {
+  const optimization = prd.optimization?.progressSummary ?? { enabled: true };
+
+  // 1. Check if summary exists and optimization is enabled
+  if (optimization.enabled && fileExists('progress-summary.md')) {
+    const summaryMtime = getModifiedTime('progress-summary.md');
+    const progressMtime = getModifiedTime('progress.md');
+
+    // Use summary if it's fresh (newer than progress.md)
+    if (summaryMtime >= progressMtime) {
+      return readFile('progress-summary.md');  // ~400-800 tokens
+    }
+  }
+
+  // 2. Fallback: Extract recent entries from progress.md
+  const recentCount = optimization.recentStoriesCount || 3;
+  return extractRecentEntries(readFile('progress.md'), recentCount);
+}
+```
+
+**Token Savings:**
+
+| Stories | Full progress.md | progress-summary.md | Savings |
+|---------|------------------|---------------------|---------|
+| 5 | ~1,500 tokens | ~500 tokens | 67% |
+| 10 | ~3,000 tokens | ~700 tokens | 77% |
+| 20 | ~6,000 tokens | ~900 tokens | 85% |
+
+The summary grows logarithmically (learnings deduplicate) while full log grows linearly.
 
 **Load cross-codebase learnings:**
 
@@ -1144,7 +1211,127 @@ npm run lint
    ---
    ```
 
-4. **Extract and save learnings to Memory:**
+4. **Generate progress-summary.md** (Token Optimization):
+
+   After updating progress.md, regenerate the compact summary:
+
+   ```javascript
+   function generateProgressSummary(prd, progressMd) {
+     const optimization = prd.optimization?.progressSummary ?? { enabled: true };
+     if (!optimization.enabled) return;
+
+     const recentCount = optimization.recentStoriesCount || 3;
+     const maxLearnings = optimization.maxLearnings || 15;
+
+     const summary = `# Progress Summary: ${prd.project}
+
+Branch: \`${prd.branchName}\`
+Started: ${prd.createdAt?.split('T')[0] || 'Unknown'}
+Last updated: ${new Date().toISOString().split('T')[0]}
+
+## Completion Status
+
+${generateCompletionStatus(prd)}
+
+## Story Status
+
+${generateStoryTable(prd)}
+
+## Key Learnings (Extracted)
+
+${extractKeyLearnings(progressMd, maxLearnings)}
+
+## Recent Context (Last ${recentCount} Stories)
+
+${extractRecentEntries(progressMd, recentCount)}
+
+---
+
+*Auto-generated from progress.md. Full history preserved in progress.md.*
+`;
+
+     writeFile('progress-summary.md', summary);
+   }
+   ```
+
+   **Helper Functions:**
+
+   ```javascript
+   function generateCompletionStatus(prd) {
+     const total = prd.userStories.length;
+     const complete = prd.userStories.filter(s => s.passes).length;
+     const inProgress = prd.userStories.find(s => !s.passes && s.attempts > 0);
+     const pct = Math.round((complete / total) * 100);
+
+     return `Stories: ${complete}/${total} complete (${pct}%)
+Current: ${inProgress ? `${inProgress.id} (attempt ${inProgress.attempts})` : 'None'}
+Blocked: None`;
+   }
+
+   function generateStoryTable(prd) {
+     const header = '| ID | Title | Status | Agent | Attempts |\n|----|-------|--------|-------|----------|';
+     const rows = prd.userStories.map(s => {
+       const status = s.passes ? '✓' : (s.attempts > 0 ? '→' : '○');
+       const agent = s.delegatedTo || '-';
+       const title = s.title.length > 30 ? s.title.slice(0, 27) + '...' : s.title;
+       return `| ${s.id} | ${title} | ${status} | ${agent} | ${s.attempts} |`;
+     });
+     return [header, ...rows].join('\n') + '\n\nLegend: ✓ complete, → in progress, ○ pending';
+   }
+
+   function extractKeyLearnings(progressMd, maxLearnings) {
+     const learnings = { patterns: [], gotchas: [], dependencies: [] };
+
+     // Extract from **Learnings:** sections
+     const learningBlocks = progressMd.match(/\*\*Learnings:\*\*\n((?:- .+\n?)+)/g) || [];
+     learningBlocks.forEach(block => {
+       const lines = block.match(/- .+/g) || [];
+       lines.forEach(line => {
+         const text = line.replace(/^- /, '').trim();
+         if (/gotcha|warning|careful|must|don't|avoid/i.test(text)) {
+           learnings.gotchas.push(text);
+         } else {
+           learnings.patterns.push(text);
+         }
+       });
+     });
+
+     // Deduplicate and limit
+     const uniquePatterns = [...new Set(learnings.patterns)].slice(0, maxLearnings);
+     const uniqueGotchas = [...new Set(learnings.gotchas)].slice(0, 5);
+
+     let output = '### Repository Patterns\n';
+     output += uniquePatterns.map(p => `- ${p}`).join('\n') || '- No patterns extracted yet';
+     output += '\n\n### Gotchas & Warnings\n';
+     output += uniqueGotchas.map(g => `- ${g}`).join('\n') || '- No gotchas recorded';
+
+     return output;
+   }
+
+   function extractRecentEntries(progressMd, count) {
+     // Split by story headers (## YYYY-MM-DD or ## timestamp)
+     const entries = progressMd.split(/(?=^## \d{4}-\d{2}-\d{2}|\n---\n\n## )/m);
+
+     // Take last N entries (skip header)
+     const recent = entries.filter(e => e.match(/^## \d/)).slice(-count);
+
+     if (recent.length === 0) return 'No completed stories yet.';
+
+     // Compress each entry (keep first 10 lines max)
+     return recent.map(entry => {
+       const lines = entry.trim().split('\n');
+       if (lines.length <= 12) return entry.trim();
+       return lines.slice(0, 12).join('\n') + '\n[...]';
+     }).join('\n\n');
+   }
+   ```
+
+   **When to Generate:**
+   - After each story completion (Step 3.4)
+   - When `status summarize` command is run
+   - Automatically on next iteration if progress.md is newer
+
+5. **Extract and save learnings to Memory:**
 
    After each successful story, evaluate if any learnings are broadly applicable:
 
@@ -1350,7 +1537,8 @@ If a story needs something not yet implemented:
 | --------------------------- | -------------------------------- | ------------------ |
 | `tasks/prd-*.md`            | Human-readable PRD               | Phase 1            |
 | `prd.json`                  | Machine-readable task list       | Phase 2            |
-| `progress.md`               | Append-only learnings            | Phase 2+           |
+| `progress.md`               | Append-only learnings (full)     | Phase 2+           |
+| `progress-summary.md`       | Compact context (auto-generated) | Phase 3 (auto)     |
 | `AGENTS.md`                 | Long-term repo patterns          | Anytime            |
 | `archive/`                  | Previous completed PRDs          | Before new feature |
 | `.worktree-scaffold.json`   | Worktree config (optional)       | User creates       |
@@ -1413,14 +1601,38 @@ When you discover patterns, add them to AGENTS.md:
 
 ## Quick Commands
 
-| Command         | What it does                         |
-| --------------- | ------------------------------------ |
-| "status"        | Show current progress and next story |
-| "skip"          | Skip current story, move to next     |
-| "pause"         | Stop autonomous mode, wait for input |
-| "split [story]" | Break a story into smaller pieces    |
-| "retry"         | Retry the current story              |
-| "complete"      | Force-mark current story as done     |
+| Command         | What it does                              |
+| --------------- | ----------------------------------------- |
+| "status"        | Show current progress and next story      |
+| "skip"          | Skip current story, move to next          |
+| "pause"         | Stop autonomous mode, wait for input      |
+| "split [story]" | Break a story into smaller pieces         |
+| "retry"         | Retry the current story                   |
+| "complete"      | Force-mark current story as done          |
+| "summarize"     | Regenerate progress-summary.md from full log |
+
+### Summarize Command
+
+The `summarize` command regenerates `progress-summary.md` from the full `progress.md`:
+
+```
+> summarize
+
+Regenerating progress-summary.md...
+
+Summary generated:
+- Stories: 12/14 complete (86%)
+- Learnings extracted: 15 patterns, 4 gotchas
+- Recent context: Last 3 stories included
+- Token savings: ~3,200 tokens (78% reduction)
+
+Summary written to progress-summary.md
+```
+
+Use this command to:
+- Force regenerate after manual edits to progress.md
+- View token savings statistics
+- Verify extracted learnings are correct
 
 ---
 
@@ -1581,6 +1793,7 @@ If you have an existing prd.json without delegation:
 - [Agent prompts](references/agent-prompts.md) - Subagent prompt templates
 - [Examples](references/examples.md) - Complete delegation flow examples
 - [Design doc](references/smart-delegation-design.md) - Architecture details
+- [Progress summarization](references/progress-summarization-design.md) - Token optimization design
 
 ---
 
@@ -1591,4 +1804,4 @@ See [references/examples.md](references/examples.md) for:
 - Story splitting patterns
 - Acceptance criteria templates
 - Complete prd.json examples
-- progress.md format
+- progress.md and progress-summary.md formats

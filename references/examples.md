@@ -98,6 +98,77 @@ Started: 2025-01-10
 ---
 ```
 
+## progress-summary.md Format (Token Optimization)
+
+The auto-generated summary provides compact context for iterations:
+
+```markdown
+# Progress Summary: Task Filtering
+
+Branch: `feature/task-filtering`
+Started: 2025-01-10
+Last updated: 2025-01-10
+
+## Completion Status
+
+Stories: 3/5 complete (60%)
+Current: US-004 (attempt 1)
+Blocked: None
+
+## Story Status
+
+| ID | Title | Status | Agent | Attempts |
+|----|-------|--------|-------|----------|
+| US-001 | Add filter dropdown component | ✓ | frontend-agent | 1 |
+| US-002 | Create filter API endpoint | ✓ | api-agent | 1 |
+| US-003 | Add filter persistence | ✓ | - | 2 |
+| US-004 | Filter by date range | → | - | 0 |
+| US-005 | Add filter presets | ○ | - | 0 |
+
+Legend: ✓ complete, → in progress, ○ pending
+
+## Key Learnings (Extracted)
+
+### Repository Patterns
+- Existing Button component accepts icon prop
+- Toolbar has specific spacing requirements (gap-2)
+- Filter state stored in URL params for sharability
+- API uses query params for filtering: ?status=active&date=2025-01-10
+
+### Gotchas & Warnings
+- Must debounce filter API calls to avoid rate limiting
+- Date picker requires date-fns for formatting
+
+## Recent Context (Last 3 Stories)
+
+### US-003: Add filter persistence (✓)
+- Saved filter state to localStorage
+- Restored on page load
+- Files: src/hooks/useFilterState.ts, src/components/FilterDropdown.tsx
+
+### US-002: Create filter API endpoint (✓)
+- GET /api/tasks?status=X&assignee=Y
+- Added query param validation
+- Files: app/api/tasks/route.ts
+
+### US-001: Add filter dropdown component (✓)
+- Created FilterDropdown using Radix UI Popover
+- Added to toolbar with icon button
+- Files: src/components/FilterDropdown.tsx, src/components/Toolbar.tsx
+
+---
+
+*Auto-generated from progress.md. Full history preserved in progress.md.*
+```
+
+**Token Comparison:**
+
+| File | Tokens (5 stories) | Tokens (20 stories) |
+|------|-------------------|---------------------|
+| progress.md | ~1,500 | ~6,000 |
+| progress-summary.md | ~500 | ~900 |
+| **Savings** | **67%** | **85%** |
+
 ## Smart Delegation Examples
 
 ### Detection Logging (Silent Mode)
